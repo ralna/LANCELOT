@@ -1,0 +1,288 @@
+#!/bin/csh
+# lan: apply LANCELOT to a problem and delete the executable after use.
+#      for Unix systems using g77
+#
+# Use: lan [-n] [-h] [-s] [-k] [-o i] [-l secs]
+#
+# where: options -n : use the load module lancelot if it exists
+#                     (Default: create a new load module)
+#                -h : print this help and stop execution
+#                -s : run the single precision version
+#                     (Default: run the double precision version)
+#                -k : keep the load module after use
+#                     (Default: delete the load module)
+#                -o : 0 for silent mode, 1 for brief description of
+#                     the stages executed
+#                     (Default: -o 0)
+#                -l : limit the cputime used to secs seconds
+#                     (Default: -l 99999999)
+
+#
+#  N. Gould and Ph. Toint, December 4th, 1990.
+#
+
+#
+#  basic system commands
+#
+
+set CP=/bin/cp
+set RM="/bin/rm -f"
+set MAKE=/usr/bin/make
+set CAT=/bin/cat
+unset noclobber
+
+#
+#  compiler flags (machine dependent)
+#
+
+set FORTRAN=gfortran
+set FFLAGS="-O3 -ffixed-form"
+
+#
+#  If there are compiled, library versions of the level-1 blas
+#  (basic linear algebra subprograms), set BLAS to a list of
+#  names of the object library suffix -lx, where the object library
+#  libx.a contains relevant blas. For instance if the blas are
+#  shared between object libraries libblas1.a and libblas2.a,
+#  BLAS should be set to "-lblas1 -lblas2", noting that those in
+#  libblas1.a will take precedence over those in libblas2.a.
+#  If compiled blas are unavailable, BLAS should be set to ""
+#
+
+set BLAS=""
+#set BLAS="-lblas"
+
+#
+#  If there is a compiled, library version of the Harwell
+#  Subroutine Library, set HSL to -lx, where the object library
+#  libx.a contains the relevant Harwell Subroutine Library.
+#  For instance if the Harwell Subroutine Library is contained
+#  in the object library libhsl.a, HSL should be set to "-lhsl".
+#  If a compiled version of the Harwell Subroutine Library is
+#  unavailable, HSL should be set to ""
+#
+
+set HSL=""
+#set HSL="-lhsl"
+
+#
+#  directory for the main executable file
+#
+
+set EXEC=$cwd
+
+#
+#  directory for temporary files
+#
+
+set TMP=/tmp
+
+#
+#  variables for each option
+#
+
+#
+# PRECISION = 0 (single precision), = 1 (double precision)
+#
+
+set PRECISION=1
+
+#
+# NEW = 0 (run existing lancelot module), = 1 (build a new module)
+#
+
+set NEW = 0
+
+#
+# KEEP = 0 (discard lancelot load module after use), = 1 (keep it)
+#
+
+set KEEP = 0
+
+#
+# OUTPUT = 0 (summary output), = 1 (detailed output from decoder)
+#
+
+set OUTPUT=0
+
+#
+# LIMIT = 0 (no cputime limit)
+#
+
+set LIMIT = 99999999
+
+#
+#  interpret arguments
+#
+
+@ last=$#argv
+@ i=1
+
+while ($i <= $last)
+  set opt=$argv[$i]
+  if("$opt" == '-n')then
+    set NEW=1
+  else if("$opt" == '-s')then
+    set PRECISION=0
+  else if("$opt" == '-h')then
+    echo ' Use: lan [-n] [-h] [-s] [-k] [-o i] [-l secs]'
+    echo ' '
+    echo ' where: options -n : use the load module lancelot if it exists'
+    echo '                     (Default: create a new load module)'
+    echo '                -h : print this help and stop execution'
+    echo '                -s : run the single precision version'
+    echo '                     (Default: run the double precision version)'
+    echo '                -k : keep the load module after use '
+    echo '                     (Default: delete the load module)'
+    echo '                -o : 0 for silent mode, 1 for brief description of'
+    echo '                     the stages executed'
+    echo '                     (Default: -o 0)'
+    echo '                -l : limits the cputime to secs seconds'
+    echo '                     (Default: -l 99999999)'
+    exit 0
+  else if("$opt" == '-k')then
+    set KEEP=1
+  else if("$opt" == '-o')then
+    @ i++
+    set OUTPUT=$argv[$i]
+  else if("$opt" == '-l')then
+    @ i++
+    set LIMIT=$argv[$i]
+  else
+    echo 'Use: lan [-n] [-h] [-s] [-k] [-o i] [-l secs]'
+    exit 1
+  endif
+  @ i++
+end
+
+#  if necessary, use the default spec file
+
+if (! -e SPEC.SPC) $CP $LANDIR/SPEC.SPC SPEC.SPC
+
+#
+#  run lancelot without rebuilding it
+#
+
+if (! $NEW) then
+  if (! -e $EXEC/lancelot || ! -x $EXEC/lancelot) then
+    echo ' '
+    echo 'load module lancelot not found/executable. Rerun with -n option'
+    echo ' '
+    exit 3
+  endif
+  if ($OUTPUT) then
+    echo ' '
+    echo 'running lancelot on current test problem ... '
+    echo ' '
+  endif
+  limit cputime $LIMIT
+  $EXEC/lancelot
+
+#  tidy up the current directory, deleting all junk.
+
+  if (! $KEEP) $RM $EXEC/lancelot
+  exit 0
+endif
+
+#
+#  build lancelot
+#
+#  directory for object files
+#
+
+if(! $PRECISION)then
+   set OBJ=$LANDIR/objects/single
+else
+   set OBJ=$LANDIR/objects/double
+endif
+
+#  if there are no library blas, include the default ones.
+
+if("$BLAS" == '')then
+   set BLAS=$OBJ/linpac.o
+endif
+
+#  if there is no library of Harwell routines, include the default ones.
+
+if("$HSL" == '')then
+   set HSL="$OBJ/duma27.o $OBJ/duma31.o $OBJ/dumc29.o"
+endif
+
+# ensure that the current test problem has been compiled.
+
+if ($OUTPUT) then
+  echo 'compiling the current test problem, if that is necessary ... '
+  echo ' '
+endif
+
+if(-e EXTERN.f && ! -z EXTERN.f) then
+  $MAKE -f $LANDIR/bin/compil lancelot >& $TMP/lanf77
+  if ($status != 0) then
+    $CAT $TMP/lanf77
+    $RM $TMP/lanf77
+    exit 1
+  endif
+endif
+
+if(! -e EXTERN.f || -z EXTERN.f) then
+  $MAKE -f $LANDIR/bin/compil lancelotnoextern >& $TMP/lanf77
+  if ($status != 0) then
+    $CAT $TMP/lanf77
+    $RM $TMP/lanf77
+    exit 1
+  endif
+endif
+
+# link all the lancelot files together.
+
+if ($OUTPUT) then
+  $CAT $TMP/lanf77
+  echo ' '
+  echo 'linking all the object files together ... '
+  echo ' '
+endif
+$RM $TMP/lanf77
+
+if (-e EXTERN.o && -z EXTERN.o) $RM EXTERN.o
+if (-e EXTERN.f && -z EXTERN.f) $RM EXTERN.f
+
+if (-e EXTERN.f) $FORTRAN $FFLAGS -o $EXEC/lancelot\
+  ELFUNS.o GROUPS.o RANGES.o SETTYP.o EXTERN.o\
+  $OBJ/runlan.o $OBJ/lance.o $OBJ/sbmin.o\
+  $OBJ/auglg.o $OBJ/dumbr.o $OBJ/datal.o\
+  $OBJ/cauch.o $OBJ/cg.o $OBJ/drche.o\
+  $OBJ/drchg.o $OBJ/asmbl.o $OBJ/speci.o\
+  $OBJ/frntl.o $OBJ/gtpgr.o $OBJ/hsprd.o\
+  $OBJ/inxac.o $OBJ/sort.o $OBJ/assl.o\
+  $OBJ/misc.o $OBJ/mdchl.o $OBJ/elgrd.o\
+  $OBJ/others.o $OBJ/precn.o $OBJ/bndsl.o\
+  $OBJ/scaln.o $OBJ/initw.o $OBJ/local.o\
+  $BLAS $HSL
+
+if (! -e EXTERN.f) $FORTRAN $FFLAGS -o $EXEC/lancelot\
+  ELFUNS.o GROUPS.o RANGES.o SETTYP.o\
+  $OBJ/runlan.o $OBJ/lance.o $OBJ/sbmin.o\
+  $OBJ/auglg.o $OBJ/dumbr.o $OBJ/datal.o\
+  $OBJ/cauch.o $OBJ/cg.o $OBJ/drche.o\
+  $OBJ/drchg.o $OBJ/asmbl.o $OBJ/speci.o\
+  $OBJ/frntl.o $OBJ/gtpgr.o $OBJ/hsprd.o\
+  $OBJ/inxac.o $OBJ/sort.o $OBJ/assl.o\
+  $OBJ/misc.o $OBJ/mdchl.o $OBJ/elgrd.o\
+  $OBJ/others.o $OBJ/precn.o $OBJ/bndsl.o\
+  $OBJ/scaln.o $OBJ/initw.o $OBJ/local.o\
+  $BLAS $HSL
+
+#  run lancelot on the current test problem.
+
+if ($OUTPUT) then
+  echo ' '
+  echo 'running lancelot on current test problem ... '
+  echo ' '
+endif
+
+limit cputime $LIMIT
+$EXEC/lancelot
+
+#  tidy up the current directory, deleting all junk.
+
+if (! $KEEP) $RM $EXEC/lancelot

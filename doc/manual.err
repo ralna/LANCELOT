@@ -1,0 +1,110 @@
+
+       ****************************************************************
+       *                                                              *
+       *                        Errata  for                           *
+       *                                                              *
+       *                         LANCELOT                             *
+       *   A Fortran Package for Large-Scale Nonlinear Optimization   *
+       *                        (Release A)                           *
+       *                                                              *
+       *             A.R. Conn, N. Gould, Ph. L. Toint                *
+       *                                                              *
+       *                Springer Verlag, SCM 17, 1992                 *
+       *                                                              *
+       ****************************************************************
+
+
+Preface:
+
+- - - line 17: "the" instead of "the the"
+
+Chapter 2:
+
+- - - p. 30, line 8: "308.75" instead of "308,75"
+- - - p. 30, line 10: "308.75" instead of "308,75"
+- - - p. 30, line -7: "308.75" instead of "308,75"
+- - - p. 34, line -11: "2.5.13" instead of "2.5.14"
+- - - p. 49, line after GROUP TYPE: "GV" instead of "T"
+- - - p. 61, line 7: should read " ZN S(i,j)  'SCALE'         RPSQ"
+- - - p. 73, line -16: "HMUDDY" instead of "-HMUDDY"
+- - - p. 78, line -15: "remembering" instead of "remebering"
+- - - p. 79, line 9:  a blank before the by
+
+Chapter 3:
+
+- - - p. 104, line -8: "holds" instead of " holds"
+- - - p. 107, line -11: Spacing before "There" incorrect.
+- - - p. 108, line -8: " unsuccessful" instead of "unsuccessful"
+- - - p. 109, line 9: "there" instead of "their"
+- - - p. 111, line 7: "an approximation" instead of "a approximation"
+- - - p. 112, line 1: There is a missing period after respectively, and 
+                  the brackets could be removed in the following sentence.
+- - - p. 112, line -3: "n_g," instead of "n_g"
+- - - p. 113, line -18: "preferred" instead of "prefered"
+- - - p. 113, line -6: should end in a period not a comma.
+- - - p. 124, line 20: missing ")"
+- - - p. 125, line 14: ">" instead of "\leq"
+- - - p. 128, line -13 (equation 3.4.73): "\lambda_i"
+               should be "s_ii \lambda_i "  and
+               "s_ii c_i(x)^2" should be "s_ii^2 c_i(x)^2"
+- - - p. 132, line 6: missing ")"
+
+Chapter 4:
+
+- - - p. 132, line -18: "\partial" instead of "\delta"  (twice)
+- - - p. 138, line -8: "INITIAL" instead of "INITIIAL"
+- - - p. 141, line -8: "as a " instead of "as an"
+
+Chapter 5:
+
+- - - p. 154, line -5: " As for the..." instead of " As fo the..."
+
+Chapter 6:
+
+- - - p. 155, line -3: "If your system ..." instead of "If the your system..."
+
+Chapter 7:
+
+- - - p. 202, line -10 Replace the clause "It may be used .... to be scaled," by
+              "It may be used to announce that the group under consideration
+               is to be scaled,"
+- - - p. 206, line -13 Replace the clause "It may be used .... to be scaled," by
+              "It may be used to announce that the group under consideration
+               is to be scaled,"
+- - - p. 217, line 22: " are" instead of "ar e"
+- - - p. 220, line 5 of Figure 7.20: " N  GROUP1" instead of " E  GROUP1"
+- - - p. 220, line 6 of Figure 7.20: " N  GROUP2" instead of " E  GROUP2"
+- - - p. 220, line 7 of Figure 7.20: " N  GROUP3" instead of " E  GROUP3"
+- - - p. 221, line 6 of Figure 7.21: add "N" in the first column of field 3
+- - - p. 221, line 36 of figure 7.21: insert a new line containing
+                                  " XT G(N)       SINE"
+- - - p. 229, line -13: " 1.2.1" instead of "1.2.1"
+- - - p. 233, line 6 of Figure 7.27: " M  SIN" instead of " R  SIN"
+- - - p. 233, line 7 of Figure 7.27: " M  COS" instead of " R  COS"
+- - - p. 241, line 15: "_" instead of "-"
+
+Chapter 8:
+
+- - - p. 254, line 3 "six entries" not "three entries"
+- - - p. 255, line 1 "ICHOSE(4)" not "ICHOSE(3)"
+- - - p. 265, line 6, remove the phrase "Notice the following:"
+- - - p. 282, line -9 "six entries" not "three entries"
+- - - p. 292, line 16 NEWSOL is a LOGICAL variable (not real)
+- - - p. 303, remove lines 21 to 27
+
+Bibliography
+
+- - - p. 311
+
+[7]
+A. R. Conn, N. I. M. Gould, M. Lescrenier, and Ph. L. Toint.
+Performance of a multifrontal scheme for partially separable optimization.
+In S. Gomez and J.P. Hennart, Editors, Advances in numerical partial
+differential equations and optimization.
+Proceedings of the Sixth Mexico-United States Workshop, pages 79-96,
+Kluwer Academic Publishers, 1994.
+
+[28]
+P. E. Gill and W. Murray.
+Newton-type methods for unconstrained and linearly constrained optimization.
+Mathematical Programming 7:311-350, 1974.

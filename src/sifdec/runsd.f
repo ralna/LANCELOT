@@ -1,0 +1,894 @@
+C  THIS VERSION: 26/02/2001 AT 09:30:00 AM.
+C ** Correction report.
+C ** Correction -1. 03/03/00: Integer formats increased
+C ** Correction 0. 20/12/99: Array holding variable types introduced.
+C ** Correction 1. 27/07/93: 1 line corrected, 2 lines added **
+C ** Correction 2. 05/08/93: 6 lines added **
+C ** Correction 3. 05/08/93: 7 lines added **
+C ** Correction 4. 05/08/93: 20 lines added **
+C ** Correction 5. 05/08/93: 10 lines added **
+C ** Correction 6. 05/08/93: 9 lines added **
+C ** Correction 7. 26/02/01: 2 dummy arguments removed from MAKEFN **
+C ** Correction 8. 26/02/01: 2 dummy arguments removed from MAKEGR **
+C ** Correction 9. 26/02/01: 5 dummy arguments removed from PRINTP **
+C ** Correction 10. 26/02/01: 2 unused format statements removed **
+C ** End of Correction report.
+      PROGRAM       MAINS
+C
+C  This is the main program for running the SIF decoder for SBMIN, AUGLG
+C  and BARIA. It calls the driver routine SDLANC which does all the work.
+C  The purpose of this main program is to open and close all files,
+C  and to care for the proper filenames when possible.
+C
+C  To obtain the UNIX version remove the characters CUNIX
+C  from Columns 1 to 5 of this program.
+C
+C  To obtain the VAX-VMS version remove the characters CVMS
+C  from Columns 1 to 5 of this program.
+C
+C  To obtain the IBM version remove the characters CIBM from
+C  Columns 1 to 5 of this program.
+C
+C  To obtain the IBM PC SALFORD FORTRAN version remove the characters
+C  CSALF from Columns 1 to 5 of this program.
+C
+C  NICK GOULD, FOR CGT PRODUCTIONS.
+C  DECEMBER 7TH, 1990.
+C
+C  Salford Fortran by Kristjan Jonasson, March 1993.
+C
+      INTEGER       IINGPS, IOUTDA, IINFN , IOUTFN, IOUTRA, IINGR
+      INTEGER       IOUTET, IOUTGR, IOUT  , IOUTEX, NEWL  , I
+      INTEGER       IINEX , IPRINT, INFORM, IALGOR
+      LOGICAL       NONAME
+      EXTERNAL      SDLANC
+CIBM  EXTERNAL      ERRSET, XUFLOW
+CDBUG external common_handler
+C
+C  ASSIGN THE STANDARD OUTOUT UNIT NUMBERS.
+C
+      PARAMETER   ( IOUT = 6 )
+C
+C  ** FOR UNIX SYSTEMS.
+C
+CUNIX CHARACTER * 10 PRB
+CUNIX CHARACTER * 24 PRBDAT, PRBFN , PRBRA , PRBOUT, PRBGR , PRBET
+CUNIX CHARACTER * 24 PRBEX
+C
+C  ** FOR VMS SYSTEMS.
+C
+CVMS  CHARACTER * 10 PRB
+CVMS  CHARACTER * 24 PRBDAT, PRBFN , PRBRA , PRBOUT, PRBGR , PRBET
+CVMS  CHARACTER * 24 PRBEX
+C ** Correction 2. 05/08/93: 6 lines added **
+C
+C  ** FOR SALFORD FORTRAN.
+C
+CSALF CHARACTER * 10 PRB
+CSALF CHARACTER * 24 PRBDAT, PRBFN , PRBRA , PRBOUT, PRBGR , PRBET
+CSALF CHARACTER * 24 PRBEX
+C ** Correction 2. 05/08/93: end of correction **
+C
+C  ** FOR WATCOM FORTRAN.
+C
+CWFC  CHARACTER * 10 PRB
+CWFC  CHARACTER * 24 PRBDAT, PRBFN , PRBRA , PRBOUT, PRBGR , PRBET
+CWFC  CHARACTER * 24 PRBEX
+C
+C  ASSIGN THE REMAINING I/O UNIT NUMBERS.
+C
+C  ** FOR UNIX SYSTEMS.
+C
+CUNIX PARAMETER   ( IOUTDA = 55, IOUTET = 56, IINGPS = 61 )
+CUNIX PARAMETER   ( IOUTFN = 52, IOUTRA = 53, IOUTGR = 54 )
+CUNIX PARAMETER   ( IOUTEX = 57                           )
+CUNIX PARAMETER   ( IINFN  = IINGPS,  IINGR = IINGPS, IINEX = IINGPS )
+CUNIX PARAMETER   ( NONAME = .FALSE. )
+C
+C  ** FOR VMS SYSTEMS.
+C
+CVMS  PARAMETER   ( IOUTDA = 55, IOUTET = 56, IINGPS = 61 )
+CVMS  PARAMETER   ( IOUTFN = 52, IOUTRA = 53, IOUTGR = 54 )
+CVMS  PARAMETER   ( IOUTEX = 57                           )
+CVMS  PARAMETER   ( IINFN  = IINGPS,  IINGR = IINGPS, IINEX = IINGPS )
+CVMS  PARAMETER   ( NONAME = .FALSE. )
+C ** Correction 3. 05/08/93: 7 lines added **
+C
+C  ** FOR SALFORD FORTRAN.
+C
+CSALF PARAMETER   ( IOUTDA = 55, IOUTET = 56, IINGPS = 61 )
+CSALF PARAMETER   ( IOUTFN = 52, IOUTRA = 53, IOUTGR = 54 )
+CSALF PARAMETER   ( IOUTEX = 57                           )
+CSALF PARAMETER   ( IINFN  = IINGPS,  IINGR = IINGPS, IINEX = IINGPS )
+CSALF PARAMETER   ( NONAME = .FALSE. )
+C ** Correction 3. 05/08/93: end of correction **
+C
+C  ** FOR WATCOM FORTRAN.
+C
+CWFC  PARAMETER   ( IOUTDA = 55, IOUTET = 56, IINGPS = 61 )
+CWFC  PARAMETER   ( IOUTFN = 52, IOUTRA = 53, IOUTGR = 54 )
+CWFC  PARAMETER   ( IOUTEX = 57                           )
+CWFC  PARAMETER   ( IINFN  = IINGPS,  IINGR = IINGPS, IINEX = IINGPS )
+CWFC  PARAMETER   ( NONAME = .FALSE. )
+C
+C  ** FOR IBM  SYSTEMS.
+C
+CIBM  PARAMETER   ( IOUTDA = 55, IOUTET = 56, IINGPS = 61 )
+CIBM  PARAMETER   ( IOUTFN = 52, IOUTRA = 53, IOUTGR = 54 )
+CIBM  PARAMETER   ( IOUTEX = 57                           )
+CIBM  PARAMETER   ( IINFN  = IINGPS,  IINGR = IINGPS, IINEX = IINGPS )
+CIBM  PARAMETER   ( NONAME = .FALSE. )
+CDBUG integer i, ieee_handler
+CDBUG i = ieee_handler( 'set', 'common', common_handler )
+C
+C  READ PROBLEM'S NAME, BUILD DEFAULT FILE NAMES AND ASSIGN
+C  THE ACTUAL VALUES USED.
+C
+C  ** FOR UNIX SYSTEMS.
+C
+CUNIX READ ( 5, 1000 ) PRB
+CUNIX WRITE( IOUT, 2000 ) PRB
+CUNIX DO 10 I = 1, 10
+CUNIX    IF ( PRB( I: I ) .EQ. ' ' ) THEN
+CUNIX      NEWL = I - 1
+CUNIX      GO TO 20
+CUNIX    END IF
+   10 CONTINUE
+CUNIX NEWL = 10
+   20 CONTINUE
+CUNIX PRBDAT = '                       '
+CUNIX PRBOUT = '                       '
+CUNIX PRBFN  = '                       '
+CUNIX PRBRA  = '                       '
+CUNIX PRBGR  = '                       '
+CUNIX PRBET  = '                       '
+CUNIX PRBEX  = '                       '
+CUNIX PRBDAT = PRB( 1 : NEWL ) // '.SIF'
+CUNIX PRBOUT = 'OUTSDIF.d'
+CUNIX PRBFN  = 'ELFUNS.f'
+CUNIX PRBRA  = 'RANGES.f'
+CUNIX PRBGR  = 'GROUPS.f'
+CUNIX PRBET  = 'SETTYP.f'
+CUNIX PRBEX  = 'EXTERN.f'
+C
+C  ** FOR VMS SYSTEMS.
+C
+CVMS  READ ( 5, 1000 ) PRB
+CVMS  WRITE( IOUT, 2000 ) PRB
+CVMS  DO 30 I = 1, 10
+CVMS     IF ( PRB( I: I ) .EQ. ' ' ) THEN
+CVMS       NEWL = I - 1
+CVMS       GO TO 40
+CVMS     END IF
+   30 CONTINUE
+CVMS  NEWL = 10
+   40 CONTINUE
+CVMS  PRBDAT = '                       '
+CVMS  PRBOUT = '                       '
+CVMS  PRBFN  = '                       '
+CVMS  PRBRA  = '                       '
+CVMS  PRBGR  = '                       '
+CVMS  PRBET  = '                       '
+CVMS  PRBEX  = '                       '
+CVMS  PRBDAT = PRB( 1 : NEWL ) // '.SIF'
+CVMS  PRBOUT = 'OUTSDIF.DAT'
+CVMS  PRBFN  = 'ELFUNS.FOR'
+CVMS  PRBRA  = 'RANGES.FOR'
+CVMS  PRBGR  = 'GROUPS.FOR'
+CVMS  PRBET  = 'SETTYP.FOR'
+CVMS  PRBEX  = 'EXTERN.FOR'
+C ** Correction 4. 05/08/93: 20 lines added **
+C
+C  ** FOR SALFORD FORTRAN.
+C
+CSALF READ ( 5, 1000 ) PRB
+CSALF WRITE( IOUT, 2000 ) PRB
+CSALF DO 50 I = 1, 10
+CSALF    IF ( PRB( I: I ) .EQ. ' ' ) THEN
+CSALF      NEWL = I - 1
+CSALF      GO TO 60
+CSALF    END IF
+   50 CONTINUE
+CSALF NEWL = 10
+   60 CONTINUE
+CSALF PRBDAT = PRB( 1 : NEWL ) // '.SIF'
+CSALF PRBOUT = 'OUTSDIF.DAT'
+CSALF PRBFN  = 'ELFUNS.FOR'
+CSALF PRBRA  = 'RANGES.FOR'
+CSALF PRBGR  = 'GROUPS.FOR'
+CSALF PRBET  = 'SETTYP.FOR'
+CSALF PRBEX  = 'EXTERN.FOR'
+C ** Correction 4. 05/08/93: end of correction **
+C
+C  ** FOR WATCOM FORTRAN.
+C
+CWFC  READ ( 5, 1000 ) PRB
+CWFC  WRITE( IOUT, 2000 ) PRB
+CWFC  DO 70 I = 1, 10
+CWFC     IF ( PRB( I: I ) .EQ. ' ' ) THEN
+CWFC       NEWL = I - 1
+CWFC       GO TO 80
+CWFC     END IF
+   70 CONTINUE
+CWFC  NEWL = 10
+   80 CONTINUE
+CWFC  PRBDAT = PRB( 1 : NEWL ) // '.SIF'
+CWFC  PRBOUT = 'OUTSDIF.DAT'
+CWFC  PRBFN  = 'ELFUNS.FOR'
+CWFC  PRBRA  = 'RANGES.FOR'
+CWFC  PRBGR  = 'GROUPS.FOR'
+CWFC  PRBET  = 'SETTYP.FOR'
+CWFC  PRBEX  = 'EXTERN.FOR'
+C
+C  OPEN THE RELEVANT FILES - UNIX SYSTEMS.
+C
+CUNIX OPEN ( IINGPS, FILE = PRBDAT, FORM = 'FORMATTED',
+CUNIX*       STATUS = 'UNKNOWN' )
+CUNIX REWIND IINGPS
+CUNIX OPEN ( IOUTDA, FILE = PRBOUT, FORM = 'FORMATTED',
+CUNIX*       STATUS = 'UNKNOWN' )
+CUNIX REWIND IOUTDA
+CUNIX OPEN ( IOUTFN, FILE = PRBFN,  FORM = 'FORMATTED',
+CUNIX*       STATUS = 'UNKNOWN' )
+CUNIX REWIND IOUTFN
+CUNIX OPEN ( IOUTRA, FILE = PRBRA,  FORM = 'FORMATTED',
+CUNIX*       STATUS = 'UNKNOWN' )
+CUNIX REWIND IOUTRA
+CUNIX OPEN ( IOUTGR, FILE = PRBGR,  FORM = 'FORMATTED',
+CUNIX*       STATUS = 'UNKNOWN' )
+CUNIX REWIND IOUTGR
+CUNIX OPEN ( IOUTET, FILE = PRBET,  FORM = 'FORMATTED',
+CUNIX*       STATUS = 'UNKNOWN' )
+CUNIX REWIND IOUTET
+CUNIX OPEN ( IOUTEX, FILE = PRBEX,  FORM = 'FORMATTED',
+CUNIX*       STATUS = 'UNKNOWN' )
+CUNIX REWIND IOUTEX
+C
+C     OPEN THE RELEVANT FILES - VMS SYSTEMS.
+C
+CVMS  OPEN ( IINGPS, FILE = PRBDAT, STATUS = 'UNKNOWN',
+CVMS *       CARRIAGECONTROL = 'LIST' )
+CVMS  OPEN ( IOUTDA, FILE = PRBOUT, STATUS = 'UNKNOWN',
+CVMS *       CARRIAGECONTROL = 'LIST' )
+CVMS  OPEN ( IOUTFN, FILE = PRBFN,  STATUS = 'UNKNOWN',
+CVMS *       CARRIAGECONTROL = 'LIST' )
+CVMS  OPEN ( IOUTRA, FILE = PRBRA,  STATUS = 'UNKNOWN',
+CVMS *       CARRIAGECONTROL = 'LIST' )
+CVMS  OPEN ( IOUTGR, FILE = PRBGR,  STATUS = 'UNKNOWN',
+CVMS *       CARRIAGECONTROL = 'LIST' )
+CVMS  OPEN ( IOUTET, FILE = PRBET,  STATUS = 'UNKNOWN',
+CVMS *       CARRIAGECONTROL = 'LIST' )
+CVMS  OPEN ( IOUTEX, FILE = PRBEX,  STATUS = 'UNKNOWN',
+CVMS *       CARRIAGECONTROL = 'LIST' )
+C ** Correction 5. 05/08/93: 10 lines added **
+C
+C     OPEN THE RELEVANT FILES - SALFORD FORTRAN.
+C
+CSALF OPEN ( IINGPS, FILE = PRBDAT, STATUS = 'UNKNOWN')
+CSALF OPEN ( IOUTDA, FILE = PRBOUT, STATUS = 'UNKNOWN')
+CSALF OPEN ( IOUTFN, FILE = PRBFN,  STATUS = 'UNKNOWN')
+CSALF OPEN ( IOUTRA, FILE = PRBRA,  STATUS = 'UNKNOWN')
+CSALF OPEN ( IOUTGR, FILE = PRBGR,  STATUS = 'UNKNOWN')
+CSALF OPEN ( IOUTET, FILE = PRBET,  STATUS = 'UNKNOWN')
+CSALF OPEN ( IOUTEX, FILE = PRBEX,  STATUS = 'UNKNOWN')
+C ** Correction 5. 05/08/93: end of correction **
+C
+C     OPEN THE RELEVANT FILES - WATCOM FORTRAN.
+C
+CWFC  OPEN ( IINGPS, FILE = PRBDAT, STATUS = 'UNKNOWN')
+CWFC  OPEN ( IOUTDA, FILE = PRBOUT, STATUS = 'UNKNOWN')
+CWFC  OPEN ( IOUTFN, FILE = PRBFN,  STATUS = 'UNKNOWN')
+CWFC  OPEN ( IOUTRA, FILE = PRBRA,  STATUS = 'UNKNOWN')
+CWFC  OPEN ( IOUTGR, FILE = PRBGR,  STATUS = 'UNKNOWN')
+CWFC  OPEN ( IOUTET, FILE = PRBET,  STATUS = 'UNKNOWN')
+CWFC  OPEN ( IOUTEX, FILE = PRBEX,  STATUS = 'UNKNOWN')
+C
+C     OPEN THE RELEVANT FILES - IBM SYSTEMS
+C
+CIBM  OPEN( UNIT = IINGPS, FORM = 'FORMATTED' )
+CIBM  OPEN( UNIT = IOUTDA, FORM = 'FORMATTED' )
+CIBM  OPEN( UNIT = IINFN,  FORM = 'FORMATTED' )
+CIBM  OPEN( UNIT = IOUTFN, FORM = 'FORMATTED' )
+CIBM  OPEN( UNIT = IOUTRA, FORM = 'FORMATTED' )
+CIBM  OPEN( UNIT = IOUTET, FORM = 'FORMATTED' )
+CIBM  OPEN( UNIT = IINGR,  FORM = 'FORMATTED' )
+CIBM  OPEN( UNIT = IOUTGR, FORM = 'FORMATTED' )
+CIBM  OPEN( UNIT = IINEX,  FORM = 'FORMATTED' )
+CIBM  OPEN( UNIT = IOUTEX, FORM = 'FORMATTED' )
+CIBM  CALL ERRSET( 212, 256, -1, 1 )
+CIBM  CALL XUFLOW( 0 )
+C
+C  specify the method to be used (1=SBMIN,2=AUGLG,3=BARIA).
+C
+      READ( 5, 1020 ) IALGOR
+C
+C  specify whether the problem should be described(<0=DEBUG,0=NO,>0=YES)
+C
+      READ( 5, 1030 ) IPRINT
+C
+C     DO THE WORK
+C
+      CALL SDLANC( IINGPS, IOUTDA, IINFN , IOUTFN, IOUTRA, IINGR ,
+     *             IOUTET, IOUTGR, IINEX , IOUTEX, IPRINT, IOUT  ,
+     *             NONAME, IALGOR, INFORM )
+C
+C   CLOSE THE OPENED FILES
+C
+      CLOSE( IINGPS )
+      IF ( INFORM .EQ. 0 ) THEN
+         CLOSE( IOUTDA )
+         CLOSE( IOUTFN )
+         CLOSE( IOUTRA )
+         CLOSE( IOUTGR )
+         CLOSE( IOUTET )
+         CLOSE( IOUTEX )
+C ** Correction 6. 05/08/93: 9 lines added **
+C CHECK IF EXTERN.FOR IS EMPTY-THEN DELETE IT
+C (BECAUSE THERE IS NO -Z TEST IN THE MS-DOS SHELL)
+CSALF    OPEN ( IOUTEX, FILE = PRBEX, STATUS = 'UNKNOWN' )
+CSALF    READ ( IOUTEX, *, END=1300 )
+CSALF    CLOSE ( IOUTEX )
+CSALF    GOTO 1301
+CWFC     OPEN ( IOUTEX, FILE = PRBEX, STATUS = 'UNKNOWN' )
+CWFC     READ ( IOUTEX, *, END=1300 )
+CWFC     CLOSE ( IOUTEX )
+CWFC     GOTO 1301
+ 1300    CONTINUE
+CSALF    CLOSE ( IOUTEX, STATUS = 'DELETE' )
+CWFC     CLOSE ( IOUTEX, STATUS = 'DELETE' )
+ 1301    CONTINUE
+C ** Correction 6. 05/08/93: end of correction **
+C
+C  IF AN ERROR HAS BEEN DISCOVERED, DELETE THE OUTPUT FILES.
+C
+      ELSE
+         CLOSE( IOUTDA, STATUS = 'DELETE' )
+         CLOSE( IOUTFN, STATUS = 'DELETE' )
+         CLOSE( IOUTRA, STATUS = 'DELETE' )
+         CLOSE( IOUTGR, STATUS = 'DELETE' )
+         CLOSE( IOUTET, STATUS = 'DELETE' )
+         CLOSE( IOUTEX, STATUS = 'DELETE' )
+      END IF
+      STOP
+ 1000 FORMAT( A10 )
+C ** Correction 10. 26/02/01: 2 unused format statements removed **
+ 1020 FORMAT( I2 )
+ 1030 FORMAT( I6 )
+ 2000 FORMAT( /, ' Problem name: ', A10 )
+      END
+CDBUG integer function
+CDBUG*common_handler( sig, code, sigcontext, addr )
+CDBUG integer sig, code, sigcontext(5), addr
+CDBUG write( 0, ' ("ieee exception", Z3,
+CDBUG*" occured at address", z8) ' ) loc(code), loc(addr)
+CCDBUG call abort( )
+CDBUG return
+CDBUG end
+C  THIS VERSION: 28/07/1994 AT 08:25:44 AM.
+      SUBROUTINE SDLANC( IINGPS, IOUTDA, IINFN , IOUTFN, IOUTRA, IINGR ,
+     *                   IOUTET, IOUTGR, IINEX , IOUTEX, IPRINT, IOUT  ,
+     *                   NONAME, IALGOR, INFORM )
+C
+C  DECODE AN SIF FILE AND CONVERT THE DATA INTO A FORM SUITABLE FOR
+C  INPUT TO SBMIN, AUGLG OR BARIA.
+C
+C  NICK GOULD, FOR CGT PRODUCTIONS.
+C  DECEMBER 7TH, 1990.
+C
+      INTEGER          IINGPS, IINFN , IINGR , INFORM, NMAX  , NGMAX
+      INTEGER          NOBMAX, ONLY1 , NIMAX , LIWK  , LWK   , NCONST
+      INTEGER          IOUTDA, IOUTRA, IOUTFN, IOUTET, IOUTGR, LENGTH
+      INTEGER          I , IG, ISG   , IINEX , IOUTEX, IOUT  , LA, LB
+      INTEGER          NSMAX , NBMAX , NETMAX, NOMAX , NLMAX , NELMAX
+      INTEGER          IPRINT, NELNUM, NELING, NEGMAX, NEPVMX, NGPVMX
+      INTEGER          NINDEX, MAXINS, MAXLEV, MAXARA, NARRAY, NOBJGR
+      INTEGER          IALGOR, NGRMAX, NRLNDX, NEPMAX, NGPMAX, NEVMAX
+      INTEGER          NINMAX, NUMAX , NSETVC, LSTADG, LSTADA, LELVAR
+      INTEGER          LSTAEV, LNTVAR, LBNDS , LINTRE, LICNA , NREAL
+      INTEGER          NLINOB, NNLNOB, NLINEQ, NNLNEQ, NLININ, NNLNIN
+      INTEGER          NFREE , NFIXED, NLOWER, NUPPER, NBOTH , NSLACK
+      INTEGER          N , NG, NBND  , NELTYP, NLVARS, NOBJ  , NRANGE
+      INTEGER          NNZA  , NGRTYP, NSTART, NLISGP, NNLVRS, NOBBND
+      DOUBLE PRECISION BIG   , BLO   , BUP
+      LOGICAL          DEBUG , NONAME, SINGLE, ONEOBJ, GOTLIN
+      CHARACTER * 10   NAMEOF, NAMERH, NAMERA, NAMEBN, NAMEST, NAMEOB
+      CHARACTER * 72   LINEEX
+      PARAMETER      ( BIG  = 1.0D+20 )
+C
+C----------------------------------------------------------------------------
+C
+C          PARAMETERS WHOSE VALUE MIGHT BE CHANGED BY THE USERS
+C          ----------------------------------------------------
+C
+C  THE FOLLOWING PARAMETERS DEFINE THE SIZES OF VARIOUS PROBLEM
+C  DEPENDENT ARRAYS.
+C
+C  THESE MAY BE CHANGED BY THE USER TO SUIT A PARTICULAR PROBLEM OR
+C  SYSTEM CONFIGURATION.
+C
+C  HOWEVER, THEY SHOULD BE CHANGED WITH CARE.  THE USERS ARE URGED TO
+C  READ THE LANCELOT MANUAL AND UNDERSTAND WHAT THEY ARE DOING!
+C
+C----------------------------------------------------------------------------
+C
+C  MAXIMUM NUMBER OF VARIABLES.
+C
+CHUG  PARAMETER      ( NMAX   = 3000000 )
+CBIG  PARAMETER      ( NMAX   = 300000  )
+CMED  PARAMETER      ( NMAX   = 3000    )
+CTOY  PARAMETER      ( NMAX   = 300     )
+C
+C  MAXIMUM NUMBER OF GROUPS.
+C
+CHUG  PARAMETER      ( NGMAX  = 5000000 )
+CBIG  PARAMETER      ( NGMAX  = 500000  )
+CMED  PARAMETER      ( NGMAX  = 5000    )
+CTOY  PARAMETER      ( NGMAX  = 50      )
+C
+C  MAXIMUM NUMBER OF DIFFERENT GROUP TYPES.
+C
+      PARAMETER      ( NGRMAX = 10    )
+C
+C  MAXIMUM TOTAL NUMBER OF REAL PARAMETERS ASSOCIATED WITH GROUPS.
+C
+CHUG  PARAMETER      ( NGPVMX = 5000000 )
+CBIG  PARAMETER      ( NGPVMX = 500000  )
+CMED  PARAMETER      ( NGPVMX = 5000    )
+CTOY  PARAMETER      ( NGPVMX = 100     )
+C
+C  MAXIMUM NUMBER OF NONLINEAR ELEMENTS.
+C
+CHUG  PARAMETER      ( NELMAX = 5000000 )
+CBIG  PARAMETER      ( NELMAX = 500000  )
+CMED  PARAMETER      ( NELMAX = 20000   )
+CTOY  PARAMETER      ( NELMAX = 2000    )
+C
+C  MAXIMUM NUMBER OF DIFFERENT NONLINEAR ELEMENT TYPES.
+C
+C ** Correction 1. 27/07/93: 1 line corrected, 2 lines added **
+CHUG  PARAMETER      ( NLMAX  = 80     )
+CBIG  PARAMETER      ( NLMAX  = 60     )
+CMED  PARAMETER      ( NLMAX  = 40     )
+CTOY  PARAMETER      ( NLMAX  = 20     )
+C ** Correction 1. 27/07/93 :1 end of correction **
+C
+C  MAXIMUM TOTAL NUMBER OF ELEMENTAL VARIABLES.
+C
+CHUG  PARAMETER      ( NEVMAX = 400000 )
+CBIG  PARAMETER      ( NEVMAX = 400000 )
+CMED  PARAMETER      ( NEVMAX = 20000  )
+CTOY  PARAMETER      ( NEVMAX = 2000   )
+C
+C  MAXIMUM TOTAL NUMBER OF INTERNAL VARIABLES.
+C
+CHUG  PARAMETER      ( NINMAX = 150000 )
+CBIG  PARAMETER      ( NINMAX = 15000  )
+CMED  PARAMETER      ( NINMAX = 5000   )
+CTOY  PARAMETER      ( NINMAX = 500    )
+C
+C  MAXIMUM NUMBER OF ENTRIES IN AN ELEMENT HESSIAN.
+C
+CHUG  PARAMETER      ( NSETVC = 1000   )
+CBIG  PARAMETER      ( NSETVC = 500    )
+CMED  PARAMETER      ( NSETVC = 100    )
+CTOY  PARAMETER      ( NSETVC = 50     )
+C
+C  MAXIMUM NUMBER OF REAL PARAMETERS ASSOCIATED WITH NONLINEAR ELEMENTS
+C
+CHUG  PARAMETER      ( NEPVMX = 4000000 )
+CBIG  PARAMETER      ( NEPVMX = 400000  )
+CMED  PARAMETER      ( NEPVMX = 20000   )
+CTOY  PARAMETER      ( NEPVMX = 2000    )
+C
+C  MAXIMUM NUMBER OF NONZEROS IN LINEAR ELEMENTS.
+C
+CHUG  PARAMETER      ( LA     = 10000000 )
+CBIG  PARAMETER      ( LA     = 1000000 )
+CMED  PARAMETER      ( LA     = 50000  )
+CTOY  PARAMETER      ( LA     = 5000   )
+C
+C  MAXIMUM NUMBER OF INTEGER PARAMETERS.
+C
+CHUG  PARAMETER      ( NINDEX = 100000 )
+CBIG  PARAMETER      ( NINDEX = 10000  )
+CMED  PARAMETER      ( NINDEX = 1000   )
+CTOY  PARAMETER      ( NINDEX = 100    )
+C
+C  MAXIMUM NUMBER OF REAL PARAMETERS.
+C
+CHUG  PARAMETER      ( NRLNDX = 200000 )
+CBIG  PARAMETER      ( NRLNDX = 20000  )
+CMED  PARAMETER      ( NRLNDX = 2000   )
+CTOY  PARAMETER      ( NRLNDX = 200    )
+C
+C  MAXIMUM NUMBER OF VECTORS OF BOUNDS.
+C
+      PARAMETER      ( NBMAX  = 2      )
+C
+C  MAXIMUM NUMBER OF VECTORS OF SOLUTIONS.
+C
+      PARAMETER      ( NSMAX  = 3      )
+C
+C  MAXIMUM NUMBER OF VECTORS OF BOUNDS ON THE OBJECTIVE FUNCTION.
+C
+      PARAMETER      ( NOBMAX = 2      )
+C
+C-----------------------------------------------------------------------------
+C
+C  END OF PARAMETERS WHICH MIGHT BE CHANGED BY THE USERS
+C
+C-----------------------------------------------------------------------------
+C
+C  DEPENDENCIES ON THE MAXIMUM NUMBER OF NONTRIVIAL GROUP TYPES.
+C  NGPMAX IS THE TOTAL NUMBER OF GROUP PARAMETERS.
+C
+      PARAMETER      ( NGPMAX = NGRMAX )
+C
+C  DEPENDENCIES ON THE MAXIMUM NUMBER OF GROUPS
+C
+      PARAMETER      ( NOMAX  = NGMAX )
+      PARAMETER      ( NUMAX  = NGMAX )
+      PARAMETER      ( LSTADG = NGMAX )
+      PARAMETER      ( LSTADA = NGMAX )
+      PARAMETER      ( LB     = NGMAX )
+      PARAMETER      ( LBNDS  = NMAX + NGMAX )
+C
+C  DEPENDENCIES ON THE MAXIMUM TOTAL NUMBER OF REAL
+C  PARAMETERS ASSOCIATED WITH GROUPS.
+C
+      PARAMETER      ( LWK    = NGPVMX )
+C
+C  DEPENDENCIES ON THE MAXIMUM NUMBER OF NONLINEAR ELEMENT TYPES.
+C  NETMAX, NIMAX AND NEPMAX ARE THE TOTAL NUMBER OF ELEMENTAL AND
+C  INTERNAL VARIABLES AND PARAMETERS RESPECTIVELY.
+C
+      PARAMETER      ( NETMAX = 5 * NLMAX )
+      PARAMETER      ( NIMAX  = 5 * NLMAX )
+      PARAMETER      ( NEPMAX = 3 * NLMAX )
+C
+C  DEPENDENCIES ON THE MAXIMUM NUMBER OF NONLINEAR ELEMENTS.
+C
+      PARAMETER      ( NEGMAX = NELMAX )
+      PARAMETER      ( LSTAEV = NELMAX )
+      PARAMETER      ( LNTVAR = NELMAX + 1 )
+      PARAMETER      ( LINTRE = NELMAX )
+      PARAMETER      ( LIWK   = NELMAX + NGMAX )
+C
+C  DEPENDENCIES ON THE MAXIMUM TOTAL NUMBER OF ELEMENTAL VARIABLES.
+C
+      PARAMETER      ( LELVAR = NEVMAX )
+C
+C  DEPENDENCIES ON THE MAXIMUM NUMBER OF NONZEROS IN LINEAR ELEMENTS.
+C
+      PARAMETER      ( LICNA  = LA     )
+C
+C  MAXIMUM NUMBER OF STATEMENTS IN A DO-LOOP.
+C
+      PARAMETER      ( MAXINS = 200    )
+C
+C  MAXIMUM NESTING OF DO-LOOPS
+C
+      PARAMETER      ( MAXLEV = 3      )
+C
+C  MAXIMUM NUMBER OF ARRAY INSTRUCTIONS.
+C
+      PARAMETER      ( MAXARA = 150    )
+C
+C  MAXIMUM SIZE OF DICTIONARY.
+C
+      PARAMETER      ( LENGTH = NMAX + NGMAX + NELMAX + NINMAX + 1000 )
+C
+C  ARRAY DEFINITIONS.
+C
+      INTEGER          INLIST( LENGTH ), ISTAEV( NELMAX )
+      INTEGER          ISTATE( NGMAX ), ITABLE ( LENGTH )
+      INTEGER          IELV  ( NLMAX  ), IINV  ( NLMAX )
+      INTEGER          ITYPEE( NELMAX ), IELING( NEGMAX, 2 )
+      INTEGER          IEPA  ( NLMAX  ), IGPA  ( NGRMAX )
+      INTEGER          IDROWS( 2, NGMAX ), ITYPEG( NGMAX )
+      INTEGER          IELVAR( LELVAR ), INTVAR( LNTVAR )
+      INTEGER          ISTADA( LSTADA ), ICNA  ( LICNA  )
+      INTEGER          ISTEP ( NELMAX ), ISTGP( NGMAX ), IWK( LIWK )
+      INTEGER          INDVAL( NINDEX ), INSTR( 5, MAXINS, MAXLEV )
+      INTEGER          NINSTR( MAXLEV ), IARRAY( 5, 3, MAXARA )
+      INTEGER          ICOORD( LA, 2 ), ISTADG( NGMAX ), IJUMP( NLMAX )
+C ** Correction 0. 20/12/99: Array holding variable types introduced.
+      INTEGER          ITYPEV( NMAX )
+      DOUBLE PRECISION EPVALU( NEPVMX ), GPVALU( NGPVMX ), DFAULT( NMAX)
+      DOUBLE PRECISION A( LA ), BND( 2, NMAX, NBMAX ), REALVL( NRLNDX )
+      DOUBLE PRECISION BNDFLT( 2, NBMAX ), CSTART( NGMAX, NSMAX )
+      DOUBLE PRECISION RSCALE( NGMAX ), CSCALE( NMAX ), WK( LWK )
+      DOUBLE PRECISION RDROWS( 2, NGMAX ), VSTART( NMAX, NSMAX )
+      DOUBLE PRECISION RVALUE( MAXARA, 3 ), VARRAY( 2, MAXARA )
+      DOUBLE PRECISION FBOUND( 2, NOBMAX ), WEIGHT( NEGMAX )
+      DOUBLE PRECISION ABYROW( LA ), B( LB ), BL( LBNDS ), BU( LBNDS )
+      DOUBLE PRECISION X( NMAX ), U( NUMAX ), ESCALE( NEGMAX )
+      DOUBLE PRECISION VSCALE( NMAX ), GSCALE( NGMAX ), CLMULT( NGMAX )
+      LOGICAL          INTREP( LINTRE ), LDEFND( NLMAX )
+      LOGICAL          SETVEC( NSETVC ), GXEQX( NGMAX )
+      CHARACTER * 1    S( 2 )
+      CHARACTER * 2    FARRAY( MAXARA )
+      CHARACTER * 4    ARE( 2 )
+      CHARACTER * 8    PNAME
+      CHARACTER * 10   NAMIIN( NINDEX ), NAMRIN( NRLNDX )
+      CHARACTER * 10   LONAME( NINMAX ), BNAMES( NBMAX  )
+      CHARACTER * 10   GNAMES( NGMAX  ), VNAMES( NMAX   )
+      CHARACTER * 10   ETYPES( NLMAX  ), GTYPES( NGRMAX )
+      CHARACTER * 10   LNAMES( NELMAX ), OBNAME( NOBMAX )
+      CHARACTER * 10   EPNAME( NEPMAX ), GPNAME( NGPMAX )
+      CHARACTER * 10   ONAMES( NOMAX  ), ENAMES( NETMAX )
+      CHARACTER * 10   EXNAME( NINMAX ), SNAMES( NSMAX )
+      CHARACTER * 10   ANAMES( NGRMAX ), INAMES( NIMAX  )
+      CHARACTER * 10   MINAME( NINMAX ), RENAME( NINMAX )
+      CHARACTER * 10   INNAME( NINMAX )
+      CHARACTER * 10   ARRAY( 3, MAXARA ), CARRAY( 2, MAXARA )
+      CHARACTER * 12   KEY   ( LENGTH )
+      CHARACTER * 160  NULINE
+      EXTERNAL         GPSMPS, INLANC, PRINTP, MAKEFN, MAKEGR, ONLY1
+      DATA S / ' ', 's' /, ARE / ' is ', 'are ' /
+      DATA ONEOBJ / .FALSE. /
+      DEBUG  = IPRINT .LT. 0
+CS    SINGLE = .TRUE.
+CD    SINGLE = .FALSE.
+      IF ( SINGLE ) THEN
+         WRITE( IOUT, 2050 )
+      ELSE
+         WRITE( IOUT, 2060 )
+      END IF
+      IF ( IPRINT .NE. 0 ) IPRINT = 9
+C
+C  READ THE GPS MPS DATA.
+C
+      CALL       GPSMPS( LA    , NMAX  , NGMAX , NOMAX , NLMAX , NELMAX,
+     *                   NIMAX , NETMAX, NEVMAX, NGRMAX, NSMAX , NEPMAX,
+     *                   NGPMAX, NBMAX , NOBMAX, NNZA  , LENGTH, N , NG,
+     *                   NOBJ  , NCONST, NRANGE, NBND  , NSTART, NELTYP,
+     *                   NGRTYP, NLVARS, NNLVRS, NLISGP, LIWK  ,
+     *                   NELNUM, NELING, NARRAY, NINDEX, NEGMAX, NEPVMX,
+     *                   NGPVMX, MAXINS, MAXLEV, MAXARA, NRLNDX, NOBBND,
+     *                   PNAME , ICOORD, IELING, INLIST, ITABLE, ISTATE,
+     *                   IELV  , IINV  , ITYPEE, IDROWS, IELVAR, ISTADG,
+     *                   ITYPEG, IEPA  , IGPA  , IWK   , ISTEP , ISTAEV,
+C ** Correction 0. 20/12/99: Array holding variable types introduced.
+     *                   ISTGP , INDVAL, INSTR , NINSTR, IARRAY, ITYPEV,
+     *                   A, BND, VSTART, CSTART, RSCALE, CSCALE, RDROWS, 
+     *                   REALVL, DFAULT, RVALUE, VARRAY, EPVALU, BNDFLT,
+     *                   GPVALU, FARRAY, FBOUND, WEIGHT, NAMIIN,
+     *                   NAMRIN, GNAMES, VNAMES, BNAMES, ETYPES, INAMES,
+     *                   LNAMES, ONAMES, ENAMES, SNAMES, ANAMES, GTYPES,
+     *                   EPNAME, GPNAME, OBNAME, ARRAY , CARRAY, KEY   ,
+     *                   SINGLE, IINGPS, IOUT  , INFORM, DEBUG )
+      IF ( INFORM .NE. 0 ) THEN
+         WRITE( IOUT, 2010 ) INFORM
+         RETURN
+      END IF
+C
+C  ASSIGN THE GROUPS TO CONSTRAINT TYPES AND OBJECTIVES.
+C
+      NLINOB = 0
+      NNLNOB = 0
+      NLINEQ = 0
+      NNLNEQ = 0
+      NLININ = 0
+      NNLNIN = 0
+      DO 100 IG = 1, NG
+         ISG    = ISTATE( IG )
+         IF ( ISG .GT. 0 ) THEN
+            ISG = MOD( ISG - 1, 4 )
+            IF ( ISG .EQ. 0 ) NLINOB = NLINOB + 1
+            IF ( ISG .EQ. 1 ) NLINEQ = NLINEQ + 1
+            IF ( ISG .GE. 2 ) NLININ = NLININ + 1
+         ELSE
+            ISG = MOD( ISG + 1, 4 )
+            IF ( ISG .EQ.   0 ) NNLNOB = NNLNOB + 1
+            IF ( ISG .EQ. - 1 ) NNLNEQ = NNLNEQ + 1
+            IF ( ISG .LE. - 2 ) NNLNIN = NNLNIN + 1
+         END IF
+  100 CONTINUE
+C
+C  SELECT RHS, RANGES AND BOUNDS.
+C
+      IF ( NCONST .GT. 0 ) NAMERH = VNAMES( NLVARS + 1 )
+      IF ( NRANGE .GT. 0 ) NAMERA = VNAMES( NLVARS + NCONST + 1 )
+      IF ( NBND   .GT. 0 ) NAMEBN = BNAMES( 1 )
+      IF ( NSTART .GT. 0 ) NAMEST = SNAMES( 1 )
+      IF ( NOBJ   .GT. 0 .AND. ONEOBJ ) NAMEOF = ONAMES( 1 )
+      IF ( NOBBND .GT. 0 ) NAMEOB = OBNAME( 1 )
+      IF ( IPRINT .NE. 0 ) WRITE( IOUT, 2070 ) NCONST, NRANGE, NBND,
+     *     NSTART, NOBJ, NOBBND
+C
+C  COVERT TO INPUT FOR ONE OF THE LANCELOT PROGRAMS.
+C
+      CALL       INLANC( N     , NLVARS, NG    , NELNUM, NOBJ  , LENGTH,
+     *                   LSTADG, LELVAR, LSTAEV, LNTVAR, LICNA , LSTADA,
+     *                   LA, LB, LBNDS , LINTRE, LIWK  , LWK   , NMAX  ,
+     *                   NGMAX , NBMAX , NSMAX , NLMAX , NELMAX, NEGMAX,
+     *                   NOBMAX, NGRMAX, NGPVMX, NEPVMX, NOMAX , NLISGP,
+     *                   NBND  , NNZA  , NCONST, NSTART, NRANGE, NOBJGR,
+     *                   NOBBND, NELTYP, NGRTYP, PNAME , ONEOBJ,
+     *                   NAMEOB, NAMERH, NAMERA, NAMEBN, NAMEST, NAMEOF,
+     *                   ISTADG, IELVAR, ISTAEV, INTVAR, ICNA  , ISTADA,
+     *                   ICOORD, INLIST, ITABLE, ISTATE,
+     *                   IDROWS, IELV  , IINV  , IGPA  , IELING( 1, 1 ),
+C ** Correction 0. 20/12/99: Array holding variable types introduced.
+     *                   ISTEP , ISTGP , ITYPEE, ITYPEG, ITYPEV, IWK   ,
+     *                   A, BND, VSTART, CSTART, RSCALE, CSCALE,
+     *                   RDROWS, DFAULT, WEIGHT, BNDFLT, WK    ,
+     *                   GPVALU, EPVALU, FBOUND, ABYROW, B , BL, BU, X ,
+     *                   CLMULT, ESCALE, GSCALE, VSCALE, INTREP, GXEQX,
+     *                   KEY   , GNAMES, VNAMES, BNAMES, SNAMES, ONAMES,
+     *                   ETYPES, GTYPES, OBNAME, IALGOR,
+     *                   IOUT  , IOUTDA, INFORM, DEBUG )
+      IF ( INFORM .NE. 0 ) THEN
+         WRITE( IOUT, 2020 ) INFORM
+         RETURN
+      END IF
+C
+C  ASSIGN THE VARIABLES TO BOUND TYPES.
+C
+      NFREE  = 0
+      NFIXED = 0
+      NLOWER = 0
+      NUPPER = 0
+      NBOTH  = 0
+      IF ( IALGOR .LE. 2 ) THEN
+         NSLACK = NLININ + NNLNIN
+      ELSE
+         NSLACK = 0
+      END IF
+      NREAL  = N - NSLACK
+      DO 110 I = 1, NREAL
+         BLO   = BL( I )
+         BUP   = BU( I )
+         IF ( BLO .LE. - BIG .AND. BUP .GE. BIG ) NFREE  = NFREE  + 1
+         IF ( BLO .LE. - BIG .AND. BUP .LT. BIG ) NUPPER = NUPPER + 1
+         IF ( BLO .GT. - BIG .AND. BUP .GE. BIG ) NLOWER = NLOWER + 1
+         IF ( BLO .GT. - BIG .AND. BUP .LT. BIG ) THEN
+            IF ( BLO .EQ. BUP ) THEN
+                NFIXED = NFIXED + 1
+            ELSE
+                NBOTH  = NBOTH  + 1
+            END IF
+         END IF
+  110 CONTINUE
+C
+C  PRINT PROBLEM SUMMARY.
+C
+      IF ( NLINOB .GT. 0 ) WRITE( IOUT, 2100 )
+     *          NLINOB, S( ONLY1( NLINOB ) )
+      IF ( NNLNOB .GT. 0 ) WRITE( IOUT, 2110 )
+     *          NNLNOB, S( ONLY1( NNLNOB ) )
+      IF ( NLINEQ + NLININ + NNLNEQ + NNLNIN .GT. 0 ) WRITE( IOUT, 2000)
+      IF ( NLINEQ .GT. 0 ) WRITE( IOUT, 2120 ) ARE( ONLY1( NLINEQ ) ),
+     *          NLINEQ, S( ONLY1( NLINEQ ) )
+      IF ( NLININ .GT. 0 ) WRITE( IOUT, 2130 ) ARE( ONLY1( NLININ ) ),
+     *          NLININ, S( ONLY1( NLININ ) )
+      IF ( NNLNEQ .GT. 0 ) WRITE( IOUT, 2140 ) ARE( ONLY1( NNLNEQ ) ),
+     *          NNLNEQ, S( ONLY1( NNLNEQ ) )
+      IF ( NNLNIN .GT. 0 ) WRITE( IOUT, 2150 ) ARE( ONLY1( NNLNIN ) ),
+     *          NNLNIN, S( ONLY1( NNLNIN ) )
+      WRITE( IOUT, 2000 )
+      IF ( NFREE  .GT. 0 ) WRITE( IOUT, 2200 ) ARE( ONLY1( NFREE  ) ),
+     *          NFREE , S( ONLY1( NFREE  ) )
+      IF ( NUPPER .GT. 0 ) WRITE( IOUT, 2210 ) ARE( ONLY1( NUPPER ) ),
+     *          NUPPER, S( ONLY1( NUPPER ) )
+      IF ( NLOWER .GT. 0 ) WRITE( IOUT, 2220 ) ARE( ONLY1( NLOWER ) ),
+     *          NLOWER, S( ONLY1( NLOWER ) )
+      IF ( NBOTH  .GT. 0 ) WRITE( IOUT, 2230 ) ARE( ONLY1( NBOTH  ) ),
+     *          NBOTH,  S( ONLY1( NBOTH  ) )
+      IF ( NFIXED .GT. 0 ) WRITE( IOUT, 2240 ) ARE( ONLY1( NFIXED ) ),
+     *          NFIXED, S( ONLY1( NFIXED ) )
+      IF ( NSLACK .GT. 0 ) WRITE( IOUT, 2250 ) ARE( ONLY1( NSLACK ) ),
+     *          NSLACK, S( ONLY1( NSLACK ) )
+      WRITE( IOUTDA, 2080 ) PNAME,
+     *          NFREE , NFIXED, NLOWER, NUPPER, NBOTH , NSLACK,
+     *          NLINOB, NNLNOB, NLINEQ, NNLNEQ, NLININ, NNLNIN
+C
+C  PRINT DETAILS OF THE PROBLEM.
+C
+C ** Correction 9. 26/02/01: 5 dummy arguments removed from PRINTP **
+      CALL       PRINTP( NMAX, NGMAX, NLMAX,
+     *                   NELMAX, NETMAX,
+     *                   NEVMAX, NEPMAX, NGRMAX, NEGMAX, NEPVMX,
+     *                   NGPVMX, NGPMAX, LSTADA, LICNA, LIWK,
+     *                   N, NG, NLVARS, NELNUM,
+     *                   ISTATE, ISTADG, IELVAR, ITYPEG, ITYPEE,
+     *                   IELV, IINV, IEPA, IGPA,
+     *                   ISTADA, ICNA, ISTGP, ISTEP, ISTAEV,
+C ** Correction 0. 20/12/99: Array holding variable types introduced.
+     *                   IELING, ITYPEV, IWK, ABYROW, B, BL, BU, X,
+     *                   EPVALU, GPVALU, GSCALE, ESCALE, VSCALE,
+     *                   PNAME, VNAMES, GNAMES,
+     *                   LNAMES, ETYPES, ENAMES,
+     *                   ANAMES, EPNAME, GPNAME, GTYPES,
+     *                   IOUT, IPRINT )
+C
+C  MAKE SUBROUTINES ELFUNS AND RANGES.
+C
+      IF ( NONAME ) PNAME = '        '
+C ** Correction 7. 26/02/01: 2 dummy arguments removed from MAKEFN **
+      CALL MAKEFN( IINFN , IOUT  , IOUTFN, IOUTRA, IOUTET, INFORM,
+     *             NLMAX , NIMAX , NETMAX, NINMAX, NUMAX ,
+     *             NELNUM, NELTYP, PNAME , ENAMES, INAMES, RENAME,
+     *             INNAME, LONAME, MINAME, EXNAME, ETYPES, LDEFND,
+     *             LENGTH, ITABLE, KEY   , IELV  , IINV  , INLIST,
+     *             EPNAME, IEPA  , NEPMAX, DEBUG , IJUMP ,
+     *             U     , SETVEC, NSETVC, SINGLE, NULINE, GOTLIN,
+     *             IPRINT )
+      IF ( INFORM .NE. 0 ) THEN
+         WRITE( IOUT, 2030 ) INFORM
+         RETURN
+      END IF
+C
+C  MAKE SUBROUTINE GROUPS AND OBTAIN GROUP INFORMATION.
+C
+C ** Correction 8. 26/02/01: 2 dummy arguments removed from MAKEGR **
+      CALL MAKEGR( IINGR , IOUT  , IOUTGR, INFORM, NGRTYP,
+     *             NGRMAX, NLMAX , NINMAX, PNAME , ANAMES,
+     *             RENAME, INNAME, LONAME, MINAME, EXNAME, GTYPES,
+     *             LDEFND, GPNAME, IGPA  , NGPMAX, DEBUG , LENGTH,
+     *             ITABLE, KEY   , INLIST, SINGLE, NULINE, GOTLIN,
+     *             IPRINT )
+      IF ( INFORM .NE. 0 ) THEN
+         WRITE( IOUT, 2040 ) INFORM
+         RETURN
+      END IF
+C
+C  FINALLY, READ ANY ADDITIONAL PROGRAMS.
+C
+  500 CONTINUE
+      IF ( GOTLIN ) THEN
+         LINEEX( 1: 72 ) = NULINE( 1: 72 )
+         GOTLIN = .FALSE.
+      ELSE
+         READ( UNIT = IINEX, FMT = 1000, END = 600, ERR = 600 ) LINEEX
+      END IF
+C
+C  SKIP BLANK LINES.
+C
+      DO 510 I = 1, 72
+         IF ( LINEEX( I: I ) .NE. ' ' ) THEN
+            WRITE( IOUTEX, 1000 ) LINEEX
+            GO TO 500
+         END IF
+  510 CONTINUE
+      GO TO 500
+  600 CONTINUE
+      INFORM = 0
+      RETURN
+C
+C  NON-EXECUTABLE STATEMENTS.
+C
+ 1000 FORMAT( A72 )
+ 2000 FORMAT( ' ' )
+ 2010 FORMAT( /, ' Return from GPSMPS, INFORM = ', I3 )
+ 2020 FORMAT( /, ' Return from INLANC, INFORM = ', I3 )
+ 2030 FORMAT( /, ' Return from MAKEFN, INFORM = ', I3 )
+ 2040 FORMAT( /, ' Return from MAKEGR, INFORM = ', I3 )
+ 2050 FORMAT( /, ' Single precision version will be formed. ', / )
+ 2060 FORMAT( /, ' Double precision version will be formed. ', / )
+ 2070 FORMAT( /, '  NCONST  NRANGE    NBND  NSTART    NOBJ  NOBBND ',
+     *        /, 6I8, / )
+C ** Correction -1. 03/03/00: Integer formats increased
+ 2080 FORMAT( A8, 12I8 )
+ 2100 FORMAT( ' The objective function uses ', I8, ' linear group', A1 )
+ 2110 FORMAT( ' The objective function uses ', I8,
+     *        ' nonlinear group', A1 )
+ 2120 FORMAT( ' There ', A4, I8, ' linear equality constraint', A1 )
+ 2130 FORMAT( ' There ', A4, I8, ' linear inequality constraint', A1 )
+ 2140 FORMAT( ' There ', A4, I8, ' nonlinear equality constraint', A1 )
+ 2150 FORMAT( ' There ', A4, I8,
+     *          ' nonlinear inequality constraint', A1 )
+ 2200 FORMAT( ' There ', A4, I8, ' free variable', A1 )
+ 2210 FORMAT( ' There ', A4, I8, ' variable', A1,
+     *          ' bounded only from above ' )
+ 2220 FORMAT( ' There ', A4, I8, ' variable', A1,
+     *          ' bounded only from below ' )
+ 2230 FORMAT( ' There ', A4, I8,
+     *        ' variable', A1, ' bounded from below and above ' )
+ 2240 FORMAT( ' There ', A4, I8, ' fixed variable', A1 )
+ 2250 FORMAT( ' There ', A4, I8, ' slack variable', A1 )
+C
+C  END OF SDLANC.
+C
+      END

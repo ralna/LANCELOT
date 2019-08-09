@@ -1,0 +1,163 @@
+         Installing LANCELOT on a Unix system (Linux/OSX)
+         ------------------------------------------------
+
+1. Installing LANCELOT (basic version)
+   -----------------------------------
+
+From this directory, issue the command
+
+  make
+
+This will create object files in the directory ./objects/double
+and an executable file sifdec_double in ./bin in double precision
+suitable for "large" SIF test examples. Additional options may
+be passed to make via the variables (with defaults in brackets)
+
+  FORTRAN=your fortran 77 compiler (gfortran)
+  FFLAGS=your fortran compiler flags (-O3 -ffixed-form)
+  SIZE=small medium large huge (large)
+  PRECISION=single double (double)
+  RM=rm command with force (/bin/rm -f)
+  CP=cp command (/bin/cp)
+  MV=mv command (/bin/mv)
+  SED=sed command (/bin/sed)
+  CHMOD=chmod command (/bin/chmod)
+
+For example
+
+  make FORTRAN='ifort' FFLAGS='-O -fixed' PRECISION='single' SIZE='medium'
+
+will build a single precision version suitable for medium-sized
+problems using the Intel ifort compiler with suitable options for
+fortran 77 code.
+
+The installation process requires space for temporary files. By
+default, these files are written in (and subsequently removed from)
+the directory /tmp.  If you wish to write these files elsewhere, you
+must set the TMP variable above to point at an appropriate directory.
+We recommend using the default directory /tmp whenever possible.
+N.B. The current directory (TMP=.) **MUST NOT** be used for temporary
+files.
+
+The LANCELOT procedures also use some basic UNIX commands and the C
+shell.  The commands are cp (copy a file), mv (rename a file),
+rm (remove a file), cat (lists a file), make (program management
+utility) and csh (C-shell).  It is assumed that these commands can be
+found in the /bin directory.  If this is not the case, the make
+variables above should be adjusted.
+
+2. Optional HSL codes
+   ------------------
+
+Some options require optional packages from the HSL mathematical
+software library http://www.hsl.rl.ac.uk/ and if a user tries to
+access these, a warning message will be issued by dummy replacement
+codes and execution will terminate.
+
+Probably the most useful external HSL package is MA27, and this is
+available without charge for personal use as part of the HSL Archive via
+  http://www.hsl.rl.ac.uk/download/MA27/latest/
+You will need to check the "Personal licence" button and register
+to access the code.
+
+The other optional packages MC29 is available without charge for
+academic users via
+  http://www.hsl.rl.ac.uk/download/MC29/latest/
+As before, you will need to check the "Personal academic licence"
+button and register to access these code.
+
+If you wish to incorporate these packages, you must edit the files
+
+  ./src/optimizers/duma27.f
+  ./src/optimizers/dumc29.f
+
+replace the dummy codes with their actual counterparts, and then
+reissue the appropriate "make" command as in 1. above.
+
+3. Preparing LANCELOT.
+   ------------------
+
+The environment variable LANDIR is used by the LANCELOT commands.  This
+variable should be set to point to the LANCELOT directory, which is the
+current directory if you are reading this.  We suggest this variable is
+set in the user's .cshrc file by inserting in this file the command
+
+   setenv LANDIR (full path name of the LANCELOT directory)
+
+The user may need to be able to run the scripts
+
+   sdlan
+   lan
+
+from  any directory.  This can  be achieved in  a  number of ways. The
+simplest is to include the lines
+
+   alias sdlan $LANDIR/bin/sdlan
+   alias lan $LANDIR/bin/lan
+
+anywhere after the line setting the LANDIR environment variable in the
+user's .cshrc file.
+
+The new version of the file .cshrc will subsequently be active in all
+new shells and can be made active in the current shell by issuing the
+command
+
+   source (absolute path name of the user's .cshrc file)
+
+4. Running LANCELOT.
+   ----------------
+
+To run LANCELOT on a new optimization problem, move into the directory
+in which the SIF file for the problem, (sif file name).SIF, resides.
+Now issue the command
+
+   sdlan -s (sif file name)
+
+to run the single precision package or
+
+   sdlan (sif file name)
+
+to run the double precision version.  LANCELOT will decode the SIF file,
+print a short summary of problem characteristics and attempt to solve
+the associated problem.
+
+For instance, move into the directory ./sampleproblems and issue the
+command
+
+   sdlan ALLIN
+
+LANCELOT will then solve the associated simple problem using the double
+precision version of the package.
+
+This run uses a default LANCELOT specification file.  This file is
+copied from the lancelot directory $LANDIR to the file SPEC.SPC in the
+current directory.  The user may change the specification options by
+editing this file as explained in the Manual.
+
+Once the problem has been decoded, it may be resolved with different
+specification options by using the lan script.
+
+5. LANCELOT Manual
+   ---------------
+
+The complete documentation on LANCELOT is available in the book
+
+   A.R. Conn, Nick Gould and Ph.L. Toint,
+   LANCELOT: a Fortran package for large-scale nonlinear optimization,
+   Springer Series in Computational Mathematics, vol. 17,
+   Springer Verlag (Heidelberg, New York),
+   ISBN 3-540-55470-X, 1992.
+
+The user is, of course, urged to read this Manual. An up-to-date list
+of errata is given in the file manual.err.
+
+Good luck!
+
+A. Conn
+N. Gould
+Ph. Toint
+May 30, 1991.
+
+Revised for the github release
+
+August 9th 2019

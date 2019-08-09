@@ -1,0 +1,564 @@
+C  THIS VERSION: 22/06/1994 AT 09:12:21 AM.
+C ** Correction report.
+C ** Correction  1. 20/08/92: 3 lines corrected **
+C ** Correction  2. 20/08/92: 3 lines corrected **
+C ** Correction  3. 29/09/92: 2 lines corrected **
+C ** Correction  4. 29/09/92: 2 lines corrected **
+C ** Correction  5. 29/01/93: 1 line corrected **
+C ** Correction  6. 29/01/93: 1 line corrected **
+C ** Correction  7. 03/02/93: 2 lines corrected, 1 line added **
+C ** Correction  8. 08/03/93: 1 line added **
+C ** Correction  9. 08/03/93: 1 line added **
+C ** Correction 10. 08/03/93: 5 lines added **
+C ** Correction 11. 08/03/93: 5 lines added **
+C ** Correction 12. 05/08/93: 1 line added **
+C ** Correction 13. 05/08/93: 1 line added **
+C ** Correction 14. 05/08/93: 5 lines added **
+C ** Correction 15. 05/08/93: 5 lines added **
+C ** Correction 16. 05/08/93: 2 lines added **
+C ** Correction 17. 15/02/94: 1 line added **
+C ** Correction 18. 15/02/94: 1 line added **
+C ** Correction 19. 15/02/94: 5 line added **
+C ** Correction 20. 15/02/94: 5 line added **
+C ** Correction 21. 15/02/94: 4 line added **
+C ** Correction 22. 15/02/94: 3 line added **
+C ** Correction 23. 22/06/94: 1 line added **
+C ** Correction 24. 22/06/94: 1 line added **
+C ** Correction 25. 22/06/94: 5 lines added **
+C ** Correction 26. 22/06/94: 5 lines added **
+C ** Correction 27. 22/06/94: 1 line added **
+C ** Correction 28. 22/06/94: 1 line added **
+C ** Correction 29. 09/08/19: CPUTIM replaced by intrinsic **
+C ** End of Correction report.
+      SUBROUTINE HASHA ( LENGTH, ITABLE )
+      INTEGER          LENGTH
+      INTEGER          ITABLE( LENGTH )
+      COMMON / HASHZ  / DPRIME, IEMPTY
+      INTEGER          IEMPTY
+      DOUBLE PRECISION DPRIME
+C
+C  SET UP INITIAL SCATTER TABLE (WILLIAMS, CACM 2, 21-24, 1959).
+C
+C  ITABLE( I ) GIVES THE STATUS OF TABLE ENTRY I.
+C  IF STATUS = - ( LENGTH + 1 ), THE ENTRY IS UNUSED.
+C
+C  NICK GOULD, FOR CGT PRODUCTIONS.
+C  4TH JULY 1989.
+C
+      INTEGER  I, IPRIME
+      EXTERNAL HASHF
+      LOGICAL  HASHF, PRIME
+      IEMPTY  = LENGTH + 1
+C
+C  FIND AN APPROPRIATE PRIME NUMBER FOR THE HASH FUNCTION.
+C  COMPUTE THE LARGEST PRIME SMALLER THAN LENGTH.
+C
+      IPRIME = 2 * ( ( LENGTH + 1 ) / 2 ) - 1
+   10 CONTINUE
+C
+C  IS IPRIME PRIME?
+C
+      PRIME = HASHF ( IPRIME )
+      IF ( .NOT. PRIME ) THEN
+         IPRIME = IPRIME - 2
+         GO TO 10
+      END IF
+      DPRIME = IPRIME
+C
+C  INITIALIZE EACH TABLE ENTRY AS UNFILLED.
+C
+      DO 20 I        = 1, LENGTH
+         ITABLE( I ) = - IEMPTY
+   20 CONTINUE
+      RETURN
+C
+C  END OF HASHA.
+C
+      END
+C  THIS VERSION: 22/06/1994 AT 09:12:21 AM.
+      SUBROUTINE HASHB ( LENGTH, NCHAR, FIELD, KEY, ITABLE, IFREE )
+      INTEGER          NCHAR, IFREE, LENGTH
+      INTEGER          ITABLE( LENGTH )
+      CHARACTER * 1    FIELD( NCHAR ), KEY( NCHAR, LENGTH )
+      COMMON / HASHZ  / DPRIME, IEMPTY
+      INTEGER          IEMPTY
+      DOUBLE PRECISION DPRIME
+C
+C  INSERT IN CHAINED SCATTER TABLE (WILLIAMS, CACM 2, 21-24, 1959).
+C
+C  ITABLE( I ) GIVES THE STATUS OF TABLE ENTRY I.
+C  IF STATUS = - ( LENGTH + 1 ), THE ENTRY IS UNUSED.
+C  IF STATUS = - K, THE ENTRY WAS USED BUT HAS BEEN DELETED. K GIVES
+C              THE INDEX OF THE NEXT ENTRY IN THE CHAIN.
+C  IF STATUS = 0, THE ENTRY IS USED AND LIES AT THE END OF A CHAIN.
+C  IF STATUS = K, THE ENTRY IS USED. K GIVES THE INDEX OF THE NEXT
+C              ENTRY IN THE CHAIN.
+C  IFIELD( I ) GIVES THE FIELD KEY FOR USED ENTRIES IN THE TABLE.
+C
+C  NICK GOULD, FOR CGT PRODUCTIONS.
+C  4TH JULY 1989.
+C
+      INTEGER          I, J, K, NBYTES, NOVER2
+CIEEE PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+C ** Correction 8. 08/03/93: 1 line added **
+COSF  PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+C ** Correction 8. 08/03/93: end of correction **
+CIBM  PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+CVAXD PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+CVAXG PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+CCRAY PARAMETER        ( NBYTES = 16, NOVER2 = NBYTES / 2 )
+C ** Correction 12. 05/08/93: 1 line added **
+CSALF PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+C ** Correction 12. 05/08/93: end of correction **
+C ** Correction 17. 15/02/94: 1 line added **
+CWFC  PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+C ** Correction 17. 15/02/94: end of correction **
+C ** Correction 23. 22/06/94: 1 line added **
+CSGI  PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+C ** Correction 23. 22/06/94: end of correction **
+      CHARACTER * 1    BFIELD( NBYTES )
+      INTEGER          IVALUE( 2 )
+      INTEGER          HASHE
+      EXTERNAL         HASHE
+      INTRINSIC        MOD, IDINT, IABS, ICHAR
+C
+C  FIND A STARTING POSITION, IFREE, FOR THE INSERTION.
+C  PERFORM THE HASHING ON 8 CHARACTERS OF FIELD AT A TIME.
+C
+      IFREE      = 0
+      DO 30 J    = 1, NCHAR, NBYTES
+         DO 10 I = 1, NBYTES
+            K    = J + I - 1
+            IF ( K .LE. NCHAR ) THEN
+               BFIELD( I ) = FIELD( K )
+            ELSE
+               BFIELD( I ) = ' '
+            END IF
+   10    CONTINUE
+C
+C  CONVERT THE CHARACTER STRING INTO TWO INTEGER NUMBERS.
+C
+         IVALUE( 1 ) = ICHAR( BFIELD( 1 ) ) / 2
+         IVALUE( 2 ) = ICHAR( BFIELD( NOVER2 + 1 ) ) / 2
+         DO 20 I = 2, NOVER2
+            IVALUE( 1 ) = 256 * IVALUE( 1 ) + ICHAR( BFIELD( I ) )
+            IVALUE( 2 ) = 256 * IVALUE( 2 ) +
+     *                          ICHAR( BFIELD( NOVER2 + I ) )
+   20    CONTINUE
+C
+C  CONVERT THE CHARACTER STRING INTO A DOUBLE PRECISION NUMBER.
+C
+C        READ( UNIT = FIELD8, FMT = 1000 ) VALUE
+C
+C  HASH AND ADD THE RESULT TO IFREE.
+C
+         IFREE = IFREE + HASHE ( IVALUE( 1 ), DPRIME )
+   30 CONTINUE
+C
+C  ENSURE THAT IFREE LIES WITHIN THE ALLOWED RANGE.
+C
+      IFREE = MOD( IFREE, IDINT( DPRIME ) ) + 1
+C
+C  IS THERE A LIST?
+C
+      IF ( ITABLE( IFREE ) .GE. 0 ) THEN
+C
+C  COMPARE TO SEE IF THE KEY HAS BEEN FOUND.
+C
+   40    CONTINUE
+         DO 50 I = 1, NCHAR
+            IF ( FIELD( I ) .NE. KEY( I, IFREE ) ) GO TO 60
+   50    CONTINUE
+C
+C  THE KEY ALREADY EXISTS AND THEREFORE CANNOT BE INSERTED.
+C
+         IF ( ITABLE( IFREE ) .GE. 0 ) THEN
+            IFREE = - IFREE
+            RETURN
+         END IF
+C
+C  THE KEY USED TO EXIST BUT HAS BEEN DELETED AND MUST BE RESTORED.
+C
+         GO TO 100
+C
+C  ADVANCE ALONG THE CHAIN TO THE NEXT ENTRY.
+C
+   60    CONTINUE
+         IF ( ITABLE( IFREE ) .NE. 0 ) THEN
+            IFREE = IABS( ITABLE( IFREE ) )
+            GO TO 40
+         END IF
+C
+C  THE END OF THE CHAIN HAS BEEN REACHED. FIND EMPTY ENTRY IN THE TABLE.
+C
+   70    CONTINUE
+         IEMPTY = IEMPTY - 1
+         IF ( IEMPTY .EQ. 0 ) THEN
+            IFREE = 0
+            RETURN
+         END IF
+         IF ( ITABLE( IEMPTY ) .GE. - LENGTH ) GO TO 70
+         ITABLE( IFREE ) = IEMPTY
+         IFREE           = IEMPTY
+      ELSE
+C
+C  THE STARTING ENTRY FOR THE CHAIN IS UNUSED.
+C
+         IF ( ITABLE( IFREE ) .GE. - LENGTH ) THEN
+            ITABLE( IFREE ) = - ITABLE ( IFREE )
+            GO TO 100
+         END IF
+      END IF
+C
+C  THERE IS NO LINK FROM THE NEWLY INSERTED FIELD.
+C
+      ITABLE( IFREE ) = 0
+C
+C  INSERT NEW KEY.
+C
+  100 CONTINUE
+      DO 110 I            = 1, NCHAR
+         KEY( I, IFREE ) = FIELD( I )
+  110 CONTINUE
+      RETURN
+C1000 FORMAT( A8 )
+C
+C  END OF HASHB.
+C
+      END
+C  THIS VERSION: 22/06/1994 AT 09:12:21 AM.
+      SUBROUTINE HASHC ( LENGTH, NCHAR, FIELD, KEY, ITABLE, IFREE )
+      INTEGER          LENGTH, NCHAR, IFREE
+      INTEGER          ITABLE( LENGTH )
+      CHARACTER * 1    FIELD( NCHAR ), KEY( NCHAR, LENGTH )
+      COMMON / HASHZ  / DPRIME, IEMPTY
+      INTEGER          IEMPTY
+      DOUBLE PRECISION DPRIME
+C
+C  SEARCH WITHIN CHAINED SCATTER TABLE (WILLIAMS, CACM 2, 21-24, 1959).
+C
+C  ITABLE( I ) GIVES THE STATUS OF TABLE ENTRY I.
+C  IF STATUS = - ( LENGTH + 1 ), THE ENTRY IS UNUSED.
+C  IF STATUS = - K, THE ENTRY WAS USED BUT HAS BEEN DELETED. K GIVES
+C              THE INDEX OF THE NEXT ENTRY IN THE CHAIN.
+C  IF STATUS = 0, THE ENTRY IS USED AND LIES AT THE END OF A CHAIN.
+C  IF STATUS = K, THE ENTRY IS USED. K GIVES THE INDEX OF THE NEXT
+C              ENTRY IN THE CHAIN.
+C  IFIELD( I ) GIVES THE FIELD KEY FOR USED ENTRIES IN THE TABLE.
+C
+C  NICK GOULD, FOR CGT PRODUCTIONS.
+C  4TH JULY 1989.
+C
+      INTEGER          I, J, K, NBYTES, NOVER2
+CIEEE PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+C ** Correction 9. 08/03/93: 1 line added **
+COSF  PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+C ** Correction 9. 08/03/93: end of correction **
+CIBM  PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+CVAXD PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+CVAXG PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+CCRAY PARAMETER        ( NBYTES = 16, NOVER2 = NBYTES / 2 )
+C ** Correction 13. 05/08/93: 1 line added **
+CSALF PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+C ** Correction 13. 05/08/93: end of correction **
+C ** Correction 18. 15/02/94: 1 line added **
+CWFC  PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+C ** Correction 18. 15/02/94: end of correction **
+C ** Correction 24. 22/06/94: 1 line added **
+CSGI  PARAMETER        ( NBYTES =  8, NOVER2 = NBYTES / 2 )
+C ** Correction 24. 22/06/94: end of correction **
+      CHARACTER * 1    BFIELD( NBYTES )
+      INTEGER          IVALUE( 2 )
+      INTEGER          HASHE
+      EXTERNAL         HASHE
+      INTRINSIC        MOD, IDINT, IABS, ICHAR
+C
+C  FIND A STARTING POSITION, IFREE, FOR THE CHAIN LEADING TO THE
+C  REQUIRED LOCATION.
+C  PERFORM THE HASHING ON NBYTES CHARACTERS OF FIELD AT A TIME.
+C
+      IFREE      = 0
+      DO 30 J    = 1, NCHAR, NBYTES
+         DO 10 I = 1, NBYTES
+            K    = J + I - 1
+            IF ( K .LE. NCHAR ) THEN
+               BFIELD( I ) = FIELD( K )
+            ELSE
+               BFIELD( I ) = ' '
+            END IF
+   10    CONTINUE
+C
+C  CONVERT THE CHARACTER STRING INTO TWO INTEGER NUMBERS.
+C
+         IVALUE( 1 ) = ICHAR( BFIELD( 1 ) ) / 2
+         IVALUE( 2 ) = ICHAR( BFIELD( NOVER2 + 1 ) ) / 2
+         DO 20 I = 2, NOVER2
+            IVALUE( 1 ) = 256 * IVALUE( 1 ) + ICHAR( BFIELD( I ) )
+            IVALUE( 2 ) = 256 * IVALUE( 2 ) +
+     *                          ICHAR( BFIELD( NOVER2 + I ) )
+   20    CONTINUE
+C
+C  CONVERT THE CHARACTER STRING INTO A DOUBLE PRECISION NUMBER.
+C
+C        READ( UNIT = FIELD8, FMT = 1000 ) VALUE
+C
+C  HASH AND ADD THE RESULT TO IFREE.
+C
+         IFREE = IFREE + HASHE ( IVALUE( 1 ), DPRIME )
+   30 CONTINUE
+C
+C  ENSURE THAT IFREE LIES WITHIN THE ALLOWED RANGE.
+C
+      IFREE = MOD( IFREE, IDINT( DPRIME ) ) + 1
+C
+C  IS THERE A LIST?
+C
+      IF ( ITABLE( IFREE ) .LT. - LENGTH ) THEN
+         IFREE = 0
+         RETURN
+      END IF
+C
+C  COMPARE TO SEE IF THE KEY HAS BEEN FOUND.
+C
+   40 CONTINUE
+         DO 50 I = 1, NCHAR
+            IF ( FIELD( I ) .NE. KEY( I, IFREE ) ) GO TO 60
+   50    CONTINUE
+C
+C  CHECK THAT THE TABLE ITEM HAS NOT BEEN REMOVED.
+C
+         IF ( ITABLE( IFREE ) .LT. 0 ) THEN
+            IFREE = - IFREE
+         END IF
+         RETURN
+C
+C  ADVANCE TO NEXT.
+C
+   60    CONTINUE
+         IF ( ITABLE( IFREE ) .EQ. 0 ) THEN
+            IFREE = 0
+            RETURN
+         END IF
+         IFREE = IABS( ITABLE( IFREE ) )
+      GO TO 40
+C1000 FORMAT( A8 )
+      END
+C
+C  END OF HASHC.
+C
+C  THIS VERSION: 22/06/1994 AT 09:12:21 AM.
+      INTEGER FUNCTION HASHE ( IVALUE, DPRIME )
+      INTEGER IVALUE( 2 )
+      DOUBLE PRECISION DPRIME
+C
+C  THE HASH FUNCTION (REID, 1976).
+C  NICK GOULD, FOR CGT PRODUCTIONS.
+C  4TH JULY 1989.
+C
+      INTRINSIC DMOD, DBLE, IABS
+      HASHE  = DMOD( DBLE( IVALUE( 1 ) ) + IVALUE( 2 ), DPRIME )
+      HASHE  = IABS( HASHE  ) + 1
+      RETURN
+C
+C  END OF HASHE.
+C
+      END
+C  THIS VERSION: 22/06/1994 AT 09:12:21 AM.
+      LOGICAL FUNCTION HASHF ( IPRIME )
+      INTEGER IPRIME
+C
+C  RETURNS THE VALUE .TRUE. IF IPRIME IS PRIME.
+C
+C  NICK GOULD, FOR CGT PRODUCTIONS.
+C  4TH JULY 1989.
+C
+      INTEGER I
+      INTRINSIC MOD, DSQRT, INT, DBLE
+      HASHF  = .FALSE.
+      IF ( MOD( IPRIME, 2 ) .EQ. 0 ) RETURN
+      DO 10 I = 3, INT( DSQRT( DBLE( IPRIME ) ) ), 2
+         IF ( MOD( IPRIME, I ) .EQ. 0 ) RETURN
+   10 CONTINUE
+      HASHF  = .TRUE.
+      RETURN
+C
+C  END OF HASHF.
+C
+      END
+C  THIS VERSION: 22/06/1994 AT 09:12:21 AM.
+      REAL FUNCTION SMACHR( INUM )
+      INTEGER       INUM
+      REAL          RC( 5 )
+C
+C  REAL CONSTANTS (SINGLE PRECISION).
+C
+C  NICK GOULD, JULY 1988.
+C
+C  RC(1) THE 'SMALLEST' POSITIVE NUMBER: 1 + RC(1) > 1.
+C  RC(2) THE 'SMALLEST' POSITIVE NUMBER: 1 - RC(2) < 1.
+C  RC(3) THE SMALLEST NONZERO +VE REAL NUMBER.
+C  RC(4) THE SMALLEST FULL PRECISION +VE REAL NUMBER.
+C  RC(5) THE LARGEST FINITE +VE REAL NUMBER.
+C
+CIEEE DATA RC( 1 ) /      1.19210E-07 /
+CIEEE DATA RC( 2 ) /      5.96047E-08 /
+CIEEE DATA RC( 3 ) /      1.40131E-45 /
+CIEEE DATA RC( 4 ) /      1.17550E-38 /
+CIEEE DATA RC( 5 ) /      3.40281E+38 /
+C ** Correction 10. 08/03/93: 5 lines added **
+COSF  DATA RC( 1 ) /    1.1920930E-07 /
+COSF  DATA RC( 2 ) /    5.9604646E-08 /
+COSF  DATA RC( 3 ) /    1.1754945E-38 /
+COSF  DATA RC( 4 ) /    1.1754945E-38 /
+COSF  DATA RC( 5 ) /    3.4028234E+38 /
+C ** Correction 10. 08/03/93: end of correction **
+CIBM  DATA RC( 1 ) /    0.953674317E-06 /
+CIBM  DATA RC( 2 ) /    0.596046449E-07 /
+CIBM  DATA RC( 3 ) /    0.539760536E-78 /
+CIBM  DATA RC( 4 ) /    0.539760536E-78 /
+CIBM  DATA RC( 5 ) /    0.723700514E+76 /
+CVAXD DATA RC( 1 ) /    5.9604646E-08 /
+CVAXD DATA RC( 2 ) /    5.9604646E-08 /
+CVAXD DATA RC( 3 ) /    2.9387360E-39 /
+CVAXD DATA RC( 4 ) /    2.9387360E-39 /
+CVAXD DATA RC( 5 ) /    1.7014116E+38 /
+CVAXG DATA RC( 1 ) /    5.9604646E-08 /
+CVAXG DATA RC( 2 ) /    5.9604646E-08 /
+CVAXG DATA RC( 3 ) /    2.9387360E-39 /
+CVAXG DATA RC( 4 ) /    2.9387360E-39 /
+CVAXG DATA RC( 5 ) /    1.7014116E+38 /
+C ** Correction 3. 29/09/92: 2 lines corrected **
+CCRAY DATA RC( 1 ) /   7.105427357602E-15 /
+CCRAY DATA RC( 2 ) /   7.105427357602E-15 /
+C ** Correction 3. 29/09/92: end of correction **
+C ** Correction 1. 20/08/92: 3 lines corrected **
+CCRAY DATA RC( 3 ) /    7.3344154702194E-2466 /
+CCRAY DATA RC( 4 ) /    7.3344154702194E-2466 /
+CCRAY DATA RC( 5 ) /    1.3634351695243E+2465 /
+C ** Correction 1. 20/08/92: end of correction **
+C ** Correction 14. 05/08/93: 5 lines added **
+CSALF DATA RC( 1 ) /      1.19210E-07 /
+CSALF DATA RC( 2 ) /      5.96047E-08 /
+CSALF DATA RC( 3 ) /      1.17550E-38 /
+CSALF DATA RC( 4 ) /      1.17550E-38 /
+CSALF DATA RC( 5 ) /      3.40281E+38 /
+C ** Correction 14. 05/08/93: end of correction **
+C ** Correction 19. 15/02/94: 5 line added **
+CWFC  DATA RC( 1 ) /      1.1920930E-007 /
+CWFC  DATA RC( 2 ) /      5.9604646E-008 /
+CWFC  DATA RC( 3 ) /      1.4012986E-045 /
+CWFC  DATA RC( 4 ) /      1.1754945E-038 /
+CWFC  DATA RC( 5 ) /      3.4028234E+038 /
+C ** Correction 19. 15/02/94: end of correction **
+C ** Correction 25. 22/06/94: 5 lines added **
+CSGI  DATA RC( 1 ) /      1.19210E-07 /
+CSGI  DATA RC( 2 ) /      5.96047E-08 /
+CSGI  DATA RC( 3 ) /      1.77549435E-38 /
+CSGI  DATA RC( 4 ) /      1.77549435E-38 /
+CSGI  DATA RC( 5 ) /      3.40282347E+38 /
+C ** Correction 25. 22/06/94: end of correction **
+      IF ( INUM .LE. 0 .OR. INUM .GE. 6 ) THEN
+         PRINT 2000, INUM
+         STOP
+      ELSE
+         SMACHR = RC( INUM )
+      ENDIF
+      RETURN
+ 2000 FORMAT( ' INUM =', I3, ' OUT OF RANGE IN SMACHR.',
+     *        ' EXECUTION TERMINATED.' )
+      END
+C  THIS VERSION: 22/06/1994 AT 09:12:21 AM.
+      DOUBLE PRECISION FUNCTION DMACHR( INUM )
+      INTEGER          INUM
+      DOUBLE PRECISION RC( 5 )
+C
+C  REAL CONSTANTS (DOUBLE PRECISION).
+C
+C  NICK GOULD, JULY 1988.
+C
+C  RC(1) THE 'SMALLEST' POSITIVE NUMBER: 1 + RC(1) > 1.
+C  RC(2) THE 'SMALLEST' POSITIVE NUMBER: 1 - RC(2) < 1.
+C  RC(3) THE SMALLEST NONZERO +VE REAL NUMBER.
+C  RC(4) THE SMALLEST FULL PRECISION +VE REAL NUMBER.
+C  RC(5) THE LARGEST FINITE +VE REAL NUMBER.
+C
+CIEEE DATA RC( 1 ) /      2.2204460492504D-16 /
+CIEEE DATA RC( 2 ) /      1.1102230246253D-16 /
+CIEEE DATA RC( 3 ) /      4.9406564584126D-324 /
+CIEEE DATA RC( 4 ) /      2.2250738585073D-308 /
+CIEEE DATA RC( 5 ) /      1.7976931348622D+308 /
+C ** Correction 11. 08/03/93: 5 lines added **
+COSF  DATA RC( 1 ) /    2.2204460492503132D-16 /
+COSF  DATA RC( 2 ) /    1.1102230246251566D-16 /
+COSF  DATA RC( 3 ) /    2.225073858507202D-308 /
+COSF  DATA RC( 4 ) /    2.225073858507202D-308 /
+COSF  DATA RC( 5 ) /    1.797693134862314D+308 /
+C ** Correction 11. 08/03/93: end of correction **
+CIBM  DATA RC( 1 ) /    0.222044604925031309D-15 /
+CIBM  DATA RC( 2 ) /    0.138777878078144569D-16 /
+CIBM  DATA RC( 3 ) /    0.539760534693402790D-78 /
+CIBM  DATA RC( 4 ) /    0.539760534693402790D-78 /
+CIBM  DATA RC( 5 ) /    0.723700557733226210D+76 /
+CVAXD DATA RC( 1 ) /    1.3877787807814458D-17 /
+CVAXD DATA RC( 2 ) /    1.3877787807814458D-17 /
+CVAXD DATA RC( 3 ) /    2.9387358770557189D-39 /
+CVAXD DATA RC( 4 ) /    2.9387358770557189D-39 /
+CVAXD DATA RC( 5 ) /    1.7014118346046922D+38 /
+CVAXG DATA RC( 1 ) /    1.110223024625158D-016 /
+CVAXG DATA RC( 2 ) /    1.110223024625158D-016 /
+CVAXG DATA RC( 3 ) /    5.562684646268004D-309 /
+CVAXG DATA RC( 4 ) /    5.562684646268004D-309 /
+CVAXG DATA RC( 5 ) /    8.988465674311578D+307 /
+C ** Correction 4. 29/09/92: 2 lines corrected **
+CCRAY DATA RC( 1 ) /   2.5243548967072377773175314090D-29 /
+CCRAY DATA RC( 2 ) /   2.5243548967072377773175314090D-29 /
+C ** Correction 4. 29/09/92: end of correction **
+C ** Correction 2. 20/08/92: 3 lines corrected **
+CCRAY DATA RC( 3 ) / 7.3344154702193886624856495682E-2466 /
+CCRAY DATA RC( 4 ) / 7.3344154702193886624856495682E-2466 /
+CCRAY DATA RC( 5 ) / 1.3634351695242699118287303058E+2465 /
+C ** Correction 2. 20/08/92: end of correction **
+C ** Correction 15. 05/08/93: 5 lines added **
+CSALF DATA RC( 1 ) /      2.2204460492504D-16 /
+CSALF DATA RC( 2 ) /      1.1102230246253D-16 /
+CSALF DATA RC( 3 ) /      4.9406564584126D-308 /
+CSALF DATA RC( 4 ) /      2.2250738585073D-308 /
+CSALF DATA RC( 5 ) /      1.7976931348622D+308 /
+C ** Correction 15. 05/08/93: end of correction **
+C ** Correction 20. 15/02/94: 5 line added **
+CWFC  DATA RC( 1 ) /      2.2204460492503D-016 /
+CWFC  DATA RC( 2 ) /      1.1102230246251D-016 /
+CWFC  DATA RC( 3 ) /      1.1102230246251D-016 /
+CWFC  DATA RC( 4 ) /      2.2250738585072D-308 /
+CWFC  DATA RC( 5 ) /      1.7976931348623D+308 /
+C ** Correction 20. 15/02/94: end of correction **
+C ** Correction 26. 22/06/94: 5 lines added **
+CSGI  DATA RC( 1 ) /      2.2204460492504D-16 /
+CSGI  DATA RC( 2 ) /      1.1102230246253D-16 /
+CSGI  DATA RC( 3 ) /      2.2250738585072014E-308 /
+CSGI  DATA RC( 4 ) /      2.2250738585072014E-308 /
+CSGI  DATA RC( 5 ) /      1.7976931348623157E+308 /
+C ** Correction 26. 22/06/94: end of correction **
+      IF ( INUM .LE. 0 .OR. INUM .GE. 6 ) THEN
+         PRINT 2000, INUM
+         STOP
+      ELSE
+         DMACHR = RC( INUM )
+      ENDIF
+      RETURN
+ 2000 FORMAT( ' INUM =', I3, ' OUT OF RANGE IN DMACHR.',
+     *        ' EXECUTION TERMINATED.' )
+      END
+C  THIS VERSION: 09/08/2019 AT 08:34:21 AM.
+      REAL FUNCTION CPUTIM( DUM )
+C
+C  GIVES THE CPU TIME IN SECONDS.
+C
+      REAL             DUM, TIME
+      CALL CPU_TIME( TIME )
+      CPUTIM = TIME
+      RETURN
+C
+C  END OF CPUTIM.
+C
+      END

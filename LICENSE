@@ -1,0 +1,92 @@
+1. Conditions of use for LANCELOT:
+   ------------------------------
+
+It order to use the LANCELOT package, or any of its constituent parts,
+a user must agree to abide by a set of conditions of use. The package is
+freely available for ``Academic'' use. ``Academic'' use of the package
+is defined to be use of the package for academic, educational, research
+or other non-commercial and not-for-profit purposes under the following
+conditions. Any use of the package implies that these conditions have been
+understood, and that the user agrees to abide by all the listed conditions.
+
+1. The copyright of the LANCELOT package and the LANCELOT, SBMIN and AUGLG
+names are vested in STFC and the University of Namur
+
+2. The package comes with no guarantee, expressed or implied, that it is
+suitable for any  specific purpose nor that it  is  free of error.  It
+should  not  be  relied on  as the  basis  to  solve  a  problem whose
+incorrect solution could result in  injury to person or  property.  If
+the package  or any of  its constituent  parts is   employed in such a
+manner, it is at the  users' own  risk and the  authors disclaim  all
+liability for such misuse.
+
+3. The use of the package, or of any of its parts, in which the
+principal or exclusive purpose is as a tool for research into, or the
+production of, military weapons, or weapon systems, is prohibited.
+
+4. The package is distributed ``as  is''.  In particular, no maintenance,
+support, troubleshooting or subsequent upgrade is implied.
+
+5. The use of LANCELOT, SBMIN or AUGLG must be acknowledged, in any
+publication which contains results obtained with the package or any of
+its parts.  A citation to the book
+
+  A. R. Conn, N. I. M. Gould and Ph. L. Toint,
+  "LANCELOT: a Fortran package for large-scale nonlinear optimization",
+  Springer Series in Computational Mathematics, vol. 17,
+  Springer Verlag (Heidelberg, New York), 1992.
+
+is suitable.
+
+6. The package, or any modification thereof, may not be sold or
+supplied, nor embedded within other software products which are
+subsequently sold, or supplied, to a third party.
+
+7. Users of the package are encouraged to send examples of the problems
+they have solved using the package to its authors. These examples
+may subsequently be passed into the public domain to allow others to
+test and compare new and existing software.
+
+8. It is the responsibility of the licensee to ensure that each user of
+the package is aware of, and agrees to abide by, all the conditions
+given above.
+
+
+2. Authors' addresses:
+   -------------------
+
+The addresses and email contact for the authors are:
+
+       Dr A. R. Conn (decesaed)
+
+       Prof Nick Gould
+       Scientific Computing Department
+       STFC-Rutherford Appleton Laboratory
+       Chilton, Oxfordshire, OX11 0QX, England
+       email: nick.gould@stfc.ac.uk
+
+       Pr Ph. L. Toint
+       Department of Mathematics,
+       University of Namur
+       61, rue de Bruxelles
+       B-5000 Namur, Belgium
+       email: philippe.toint@unamur.be
+
+and aditional help may be availble from
+
+       Prof Dominique Orban
+       Ecole Polytechnique de Montreal
+       Department of Mathematics and Industrial Engineering
+       Montreal QC, Canada
+       email: Dominique.Orban@polymtl.ca
+
+3. Evolution: LANCELOT B
+   ---------------------
+
+There is a more up-to-date, maintained version of LANCELOT
+that is available as part of GALAHAD, with far more liberal
+licencing conditions: See
+
+  https://github.com/ralna/GALAHAD
+
+for details.

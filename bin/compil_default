@@ -1,0 +1,22 @@
+# Compile test problems for Unix systems using gfortran
+
+#
+# Ph. Toint, November 21st, 1991, for CGT Productions
+#
+# Compiler flags (machine dependent)
+#
+
+FORTRAN=gfortran
+FFLAGS=  -O3 -ffixed-form
+
+.SUFFIXES: .o .f
+.f.o:
+	$(FORTRAN) -c $(FFLAGS) $<
+
+#
+#  the compilations
+#
+
+lancelot: ELFUNS.o GROUPS.o RANGES.o SETTYP.o EXTERN.o
+
+lancelotnoextern: ELFUNS.o GROUPS.o RANGES.o SETTYP.o

@@ -1,0 +1,42 @@
+LANCELOT A is a fortran 77 package for large-scale nonlinear
+optimization written in the 1990s. There is a more up-to-date version
+available as part of GALAHAD (see https://github.com/ralna/GALAHAD).
+This, therefore, is simply an archive for anyone interested in the
+evolution of the software, or perhaps those with a sentimental
+attachment for those bygone days when fortran was simpler ...
+
+Build instructions in ./INSTALL
+
+Licence details in ./LICENSE
+(note American spelling even if license it is a verb).
+
+Software default options in ./SPEC.SPC, a primer of keywords
+in ./SAMPLE.SPC
+
+File source in ./src and its subdirectories
+
+Empty object file directories as subdirectories of ./objects
+
+A few trial problem examples in SIF format in ./sampleproblems ,
+many, many more available from https://bitbucket.org/optrove/sif
+
+The user manual is
+
+   A.R. Conn, Nick Gould and Ph.L. Toint,
+   LANCELOT: a Fortran package for large-scale nonlinear optimization,
+   Springer Series in Computational Mathematics, vol. 17,
+   Springer Verlag (Heidelberg, New York),
+   ISBN 3-540-55470-X, 1992.
+
+with a list of errata in ./doc/
+
+Version summary in ./version
+
+A. R. Conn
+Nick Gould
+Ph. L. Toint
+May 30th 1991
+
+Revised for the github release
+
+August 9th 2019

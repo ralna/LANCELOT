@@ -9,9 +9,9 @@
 
 #  Basic system commands
 
-RM=/bin/rm -f
-CP=/bin/cp
-MV=/bin/mv
+RM=rm -f
+CP=cp
+MV=mv
 
 #  Temporary directory for compilation
 #  ( do NOT use TMP = . which would cause file overwriting)

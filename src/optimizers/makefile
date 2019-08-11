@@ -8,8 +8,8 @@
 
 #  Basic system commands
 
-RM=/bin/rm -f
-CP=/bin/cp
+RM=rm -f
+CP=cp
 
 #  Set directory for temporary object files
 #  (do NOT use TMP = . which would cause file overwriting)

@@ -7,11 +7,11 @@
 
 #  Basic system commands
 
-RM=/bin/rm -f
-CP=/bin/cp
-MV=/bin/mv
-SED=/bin/sed
-CHMOD=/bin/chmod
+RM=rm -f
+CP=cp
+MV=mv
+SED=sed
+CHMOD=chmod
 
 #  Temporary directory for compilation
 #  ( do NOT use TMP = . which would cause file overwriting)

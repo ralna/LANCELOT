@@ -1,0 +1,32 @@
+language: bash
+
+os:
+  - linux
+  - osx
+
+sudo: required
+
+branches:
+  only:
+    - master
+
+notifications:
+  email: false
+
+before_install:
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo apt-get update -qq; sudo apt-get install -qq wget gfortran csh; fi
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew update; brew cask uninstall oclint; brew install gcc tcsh; fi
+  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+
+install:
+  - cd $TRAVIS_BUILD_DIR
+  - make
+  - make PRECISION=single
+
+script:
+  - export LANDIR=$TRAVIS_BUILD_DIR
+  - cd $LANDIR/sampleproblems && $LANDIR/bin/sdlan ALLIN
+  - cd $LANDIR/sampleproblems && $LANDIR/bin/lan -n
+  - cd $LANDIR/sampleproblems && $LANDIR/bin/sdlan -s ALLIN
+  - cd $LANDIR/sampleproblems && $LANDIR/bin/lan -s -n
+

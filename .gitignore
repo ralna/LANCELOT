@@ -1,0 +1,11 @@
+bin/compil
+bin/lan
+bin/sdlan
+bin/sifdec_double
+bin/sifdec_single
+src/double
+src/single
+src/small
+src/medium
+src/large
+objects

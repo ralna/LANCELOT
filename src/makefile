@@ -48,7 +48,7 @@ install:
 help:
 	@ echo "Possible choices are:"
 	@ echo " - help: this information"
-	@ echo " - install: install LANCELOT A and its SIF file decoder"
+	@ echo " - lancelot: install LANCELOT A and its SIF file decoder"
 	@ echo " -  options (default)"
 	@ echo " -   FORTRAN=your fortran 77 compiler (gfortran)"
 	@ echo " -   FFLAGS=your fortran compiler flags (-O3 -ffixed-form)"

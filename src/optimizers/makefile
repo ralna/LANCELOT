@@ -8,8 +8,8 @@
 
 #  Basic system commands
 
-RM=/bin/rm -f
-CP=/bin/cp
+RM=rm -f
+CP=cp
 
 #  Set directory for temporary object files
 #  (do NOT use TMP = . which would cause file overwriting)
@@ -35,6 +35,9 @@ FFLAGS= -O3 -ffixed-form
 
 #  Filtering rule
 
+$(OD):
+	mkdir -p $(OD)
+
 .SUFFIXES: .o .f
 .f.o:
 	../$(PRECISION) < $< | ../$(SIZE) > $(TMP)/$<
@@ -53,11 +56,11 @@ OB = asmbl.o   auglg.o   dumbr.o  cauch.o   cg.o     drche.o  lance.o  \
 
 lancelot: lancelot_$(PRECISION)
 
-lancelot_single:
+lancelot_single: $(OD)
 	$(MAKE) $(OB) PRECISION=single SIZE=$(SIZE) TMP=$(TMP) \
                   OD=../../objects/single
 
-lancelot_double:
+lancelot_double: $(OD)
 	$(MAKE) $(OB) PRECISION=double SIZE=$(SIZE) TMP=$(TMP) \
                   OD=../../objects/double
 

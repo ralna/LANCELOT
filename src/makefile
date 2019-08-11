@@ -7,9 +7,9 @@
 
 #  Basic system commands
 
-RM=/bin/rm -f
-CP=/bin/cp
-MV=/bin/mv
+RM=rm -f
+CP=cp
+MV=mv
 
 #  Temporary directory for compilation
 #  ( do NOT use TMP = . which would cause file overwriting)
@@ -48,7 +48,7 @@ install:
 help:
 	@ echo "Possible choices are:"
 	@ echo " - help: this information"
-	@ echo " - install: install LANCELOT A and its SIF file decoder"
+	@ echo " - lancelot: install LANCELOT A and its SIF file decoder"
 	@ echo " -  options (default)"
 	@ echo " -   FORTRAN=your fortran 77 compiler (gfortran)"
 	@ echo " -   FFLAGS=your fortran compiler flags (-O3 -ffixed-form)"

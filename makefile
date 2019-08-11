@@ -7,11 +7,11 @@
 
 #  Basic system commands
 
-RM=/bin/rm -f
-CP=/bin/cp
-MV=/bin/mv
-SED=/bin/sed
-CHMOD=/bin/chmod
+RM=rm -f
+CP=cp
+MV=mv
+SED=sed
+CHMOD=chmod
 
 #  Temporary directory for compilation
 #  ( do NOT use TMP = . which would cause file overwriting)
@@ -33,7 +33,7 @@ FFLAGS= -O3 -ffixed-form
 
 #  The installation
 
-install:
+lancelot:
 	echo "FORTRAN=" $(FORTRAN)
 	echo " FFLAGS=" $(FFLAGS)
 	cd ./src ; $(MAKE) install \
@@ -57,7 +57,7 @@ install:
 help:
 	@ echo "Possible choices are:"
 	@ echo " - help: this information"
-	@ echo " - install: install LANCELOT A and its SIF file decoder"
+	@ echo " - lancelot: install LANCELOT A and its SIF file decoder"
 	@ echo " -  options (default)"
 	@ echo " -   FORTRAN=your fortran 77 compiler (gfortran)"
 	@ echo " -   FFLAGS=your fortran compiler flags (-O3 -ffixed-form)"

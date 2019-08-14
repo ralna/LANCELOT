@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ralna/LANCELOT.svg?branch=master)](https://travis-ci.org/ralna/LANCELOT)
+
 LANCELOT A is a fortran 77 package for large-scale nonlinear
 optimization written in the 1990s. There is a more up-to-date version
 available as part of GALAHAD (see https://github.com/ralna/GALAHAD).
